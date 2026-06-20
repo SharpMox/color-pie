@@ -33,6 +33,15 @@
 - **Verify before claiming done.** Run the relevant checks (build/tests/linters or a
   real run) and confirm the output before saying something works.
 
+## Runbooks
+
+- **"Update Example Cards"** → invoke the `update-example-cards` skill
+  (`.claude/skills/update-example-cards/SKILL.md`). It syncs the Example Cards Notion
+  database from each row's comment to Scryfall (exact match), rewrites the rows via MCP,
+  replies to each comment (comments can't be auto-deleted), and reports a deletion
+  checklist. Enumeration uses a tall-viewport `agent-browser` scan; per-row work runs on
+  parallel Sonnet subagents.
+
 ## Commits
 
 ```
