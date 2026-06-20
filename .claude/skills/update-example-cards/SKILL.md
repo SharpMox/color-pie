@@ -95,15 +95,16 @@ Give each subagent the work item + the fixed facts above and these instructions:
 3. **Build the `Image` file value** — `file://` + JS-`encodeURIComponent` of compact JSON
    `{"source":"<normal image url>","permissionRecord":{"table":"block","id":"<page_id>","spaceId":"2146ddf2-a1b0-445b-8e24-1ecb8c68d91d"}}`.
    In Python: `'file://'+urllib.parse.quote(json.dumps(obj,separators=(',',':')), safe="-_.!~*'()")`.
-4. **Update** with `notion-update-page(page_id, command="update_properties", properties={...})`:
+4. **Update** with `notion-update-page(page_id, command="update_properties", properties={...}, cover="<image_uris.normal>")`:
    - `Card` = Scryfall `name`
    - `Image URL` = `image_uris.normal`  (property name is "Image URL" — NOT the special "url" case, so no prefix)
    - `Image` = the `file://...` string from step 3
+   - **`cover`** (the tool's `cover` argument, NOT a property) = `image_uris.normal`. The **page cover is separate from the `Image` property** and must be set explicitly — otherwise the row keeps the OLD card's cover art. This was a real miss; always set it.
    - `Notes` = one concise line in the existing style: `"<Color> <type>; <plain-English effect> (<effect tag>)."`
    - `Colors` = JSON-array string of color page URLs from `color_identity` (colorless → omit + flag)
    - `Effects` = JSON-array string of existing Effect page URL(s). Find by `notion-search(data_source_url="collection://1eea3791-e75a-46d1-9303-00e18e044579", query=<mechanic>)`. **Link existing taxonomy only**; if nothing fits, leave `Effects` unchanged/empty and flag it. Never create new Effect pages. (Often the row's current Effect still fits — keep it.)
-5. **Verify**: `notion-fetch(page_id)` again; confirm `Card`, `Image URL`, and `Colors` match Scryfall. Retry once on mismatch, else flag.
-6. **Reply**: `notion-create-comment(page_id, discussion_id, markdown="✅ Updated this row to **<name>** (from Scryfall): name, image, Image URL, Notes. Please delete/resolve this comment.")`
+5. **Verify**: `notion-fetch(page_id)` again; confirm `Card`, `Image URL`, and `Colors` match Scryfall. To check the **cover**, open the row page in `agent-browser` and confirm the Scryfall image at `width=2000` carries the NEW card's id (the cover renders at width=2000; the `Image` thumbnail at width=50). Retry once on mismatch, else flag.
+6. **Reply**: `notion-create-comment(page_id, discussion_id, markdown="✅ Updated this row to **<name>** (from Scryfall): name, image, cover, Image URL, Notes. Please delete/resolve this comment.")`
 7. **Return** structured result: `{page_id, from: currentCard, to: name, effectsFlag?, status: "updated"|"unresolved"|"flagged"}`.
 
 ## Step 3 — Report (orchestrator)
