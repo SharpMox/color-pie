@@ -37,8 +37,11 @@ Run **fully autonomously**: no demo-first, no per-row approval. End with a repor
 - **Bulk-query MCP tools are plan-gated** (`query_data_sources`, `query_database_view`) — they error. Don't use them.
 - **Comments can't be deleted or resolved** via MCP. Reply with `notion-create-comment`; the user deletes manually.
 - **All writes go through MCP** (`notion-update-page`). The browser is only for read/enumeration and can stay logged-out/public.
-- **Headless browser won't lazy-load rows** on scroll/wheel. The fix: set a very tall viewport so Notion renders the whole table at once (see step 1).
+- **Headless browser won't lazy-load rows** on scroll/wheel/`scrollTop` — none of them trigger Notion's pagination. The fix: set a very tall viewport so Notion renders the whole table at once (see step 1).
+- **Row comments don't appear in the global Comments/Discussions panel** (it reports "no open discussions" even when rows have comments). Comments live on the row *pages* — find them per-row, not via the page-level panel.
+- **`notion-search` caps at ~25 results** and is semantic, so it can't enumerate the full table. Use it only for targeted lookups (e.g. matching an Effect).
 - **Match is EXACT only** (`cards/named?exact=`, case-insensitive). No fuzzy.
+- **Scryfall is public** — use `curl` for raw JSON (not WebFetch, which summarizes and can't read the authed Notion page anyway).
 
 ## Step 1 — Enumerate commented rows (orchestrator)
 
@@ -57,6 +60,11 @@ agent-browser eval '(() => {
 
 The tall viewport must render ~all rows (`totalRows` should be the full table, ~190+, not ~24).
 If it only shows ~24, the viewport didn't take — re-`set viewport` and reload.
+
+**Fallback enumeration (if the browser trick ever fails):** `notion-fetch` each of the 5
+Colors pages (URLs in Fixed facts), union their `Example Cards` relation arrays → the full
+set of ~190 row page IDs, then `notion-get-comments` on each. Deterministic and complete,
+but ~190 calls. (Colorless cards won't be in any color's list — rare here.)
 
 For **each** commented row id, get authoritative data via MCP:
 `notion-get-comments(page_id=<id>, include_all_blocks=true)` → take each **unresolved**
