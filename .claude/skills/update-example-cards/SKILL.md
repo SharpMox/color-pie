@@ -67,13 +67,20 @@ set of ~190 row page IDs, then `notion-get-comments` on each. Deterministic and 
 but ~190 calls. (Colorless cards won't be in any color's list — rare here.)
 
 For **each** commented row id, get authoritative data via MCP:
-`notion-get-comments(page_id=<id>, include_all_blocks=true)` → take each **unresolved**
-discussion's comment **text** (= target card) and **discussion_id** (needed to reply).
+`notion-get-comments(page_id=<id>, include_all_blocks=true)`. For each unresolved discussion:
+- **targetCard** = the **first (oldest) human comment** text in the discussion. Comments come
+  oldest-first; the human's card request is the first one.
+- **discussion_id** = the discussion id (needed to reply).
+- **Idempotency — skip already-handled discussions.** If the discussion already contains a
+  reply this skill posted (any comment whose text starts with `✅ Updated` or `⚠️ Couldn't
+  resolve`), it's done — **skip it**. Never feed a `✅`/`⚠️` reply back in as a `targetCard`
+  (it would fail Scryfall and post a bogus "couldn't resolve"). This makes re-runs safe no-ops.
+
 Note: a row's comment badge can flicker/drop right after that row is edited — that's why
 enumeration runs before any edits, and MCP `get-comments` is the source of truth.
 
-Build the work list: `{page_id, currentCard, targetCard, discussion_id}`.
-If there are zero commented rows, report "nothing to do" and stop.
+Build the work list: `{page_id, currentCard, targetCard, discussion_id}` from the
+non-skipped discussions only. If the work list is empty, report "nothing to do" and stop.
 
 ## Step 2 — Process each row (one Sonnet subagent per work item, in parallel)
 
