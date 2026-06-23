@@ -70,17 +70,29 @@ details.more .sub { font-size: 11px; font-weight: 700; color: var(--text-soft); 
 .group-head::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 .group-head.fo-label { margin-top: 24px; }
 .filtered-out { display: flex; flex-direction: column; gap: 6px; opacity: .4; }
-/* Variant group: fieldset frames the rows; no horizontal padding so rows stay
-   column-aligned with the sticky header. */
-fieldset.group { display: flex; flex-direction: column; gap: 6px; border: 1px solid var(--border); border-radius: 12px; margin: 8px 0; padding: 6px 10px 10px; }
-fieldset.group > legend { margin-left: 10px; padding: 0 6px; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-soft); }
+/* Variant group: a native <details> frames the rows; <summary> is the base-name
+   header (collapsed by default, auto-opened while filtering). */
+/* block, not flex: a closed <details> keeps hidden rows as 0-height flex items, so flex
+   gap adds phantom space below the summary; row spacing is explicit margin instead. */
+details.group { display: block; }
+/* collapsed: summary is a row (base name + shared P/S/T), same grid/height as a .row */
+details.group > summary { display: grid; grid-template-columns: var(--cols); gap: 4px 8px; align-items: center; padding: 10px 14px; cursor: pointer; list-style: none; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
+details.group > summary::-webkit-details-marker { display: none; }
+details.group > summary:hover { border-color: var(--accent); }
+details.group > summary .row-name::before { content: ''; display: inline-block; vertical-align: middle; margin-right: 8px; width: 0; height: 0; border: 5px solid transparent; border-left: 7px solid var(--text-soft); border-right: 0; transition: transform .12s; }
+details.group[open] > summary .row-name::before { transform: rotate(90deg); }
+/* expanded: the <details> becomes a frame wrapping the rows; header drops its P/S/T + chrome */
+details.group[open] { border: 1px solid var(--border); border-radius: 12px; padding: 6px; }
+details.group[open] > summary { border: 0; background: transparent; }
+details.group[open] > summary .tier-cell { display: none; }
+details.group[open] > .row { margin-top: 6px; }
 .row {
   width: 100%; text-align: left; cursor: pointer;
   background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
   padding: 10px 14px; color: var(--text);
 }
 .row:hover { border-color: var(--accent); }
-.row.grouped { border-color: transparent; }
+.row.grouped { border-color: var(--border); }   /* variant rows sit inside the open group frame */
 .cell-main { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .row-name { font-size: 14.5px; font-weight: 600; }
 .row-tags { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -122,7 +134,7 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
 /* ===== Mobile: stack rows (name on top, tags + labeled P/S/T columns below) ===== */
 @media (max-width: 560px) {
   .list-head { display: none; }                 /* tabular header doesn't map to stacked rows */
-  .row { grid-template-columns: repeat(3, 1fr); row-gap: 10px; padding: 12px; }
+  .row, details.group > summary { grid-template-columns: repeat(3, 1fr); row-gap: 10px; padding: 12px; }
   .cell-main { grid-column: 1 / -1; }            /* name + tags take the full first line */
   .row-name { font-size: 13.5px; }
   .tier-cell { display: block; text-align: center; }
@@ -322,22 +334,27 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
   // Colour picker only sorts (never filters). Every other filter (tier, type,
   // category, keyword, search) partitions effects into results (full opacity) and
   // filtered-out (dimmed, beneath) — nothing is ever fully hidden.
-  // multi-variant groups are framed in a fieldset (legend = base name); single
-  // effects render as a bare row.
-  function groupWrap(g, isGroup, rows) {
+  // multi-variant groups are a collapsible <details> (summary = base name),
+  // collapsed by default and auto-opened while filtering; single effects render
+  // as a bare row.
+  function groupWrap(g, isGroup, rows, open) {
     var inner = rows.map(function (e) { return rowHTML(e, isGroup); }).join('');
-    return isGroup ? '<fieldset class="group"><legend>' + esc(g.base) + '</legend>' + inner + '</fieldset>' : inner;
+    return isGroup ? '<details class="group"' + (open ? ' open' : '') + '><summary>' +
+      '<span class="cell-main"><span class="row-name">' + esc(g.base) + '</span></span>' +
+      tierCells(g.baseEffect) + '</summary>' + inner + '</details>' : inner;
   }
   function render() {
     var resHtml = '', outHtml = '', shown = 0, dimmed = 0;
+    // groups collapse by default; any active filter/search auto-opens matching groups
+    var filtering = !!query || !!filt.type || !!filt.category || filt.interaction.size || filt.duration.size || filt.baseKeyword.size || tier !== 'all';
     sortGroups(GROUPS).forEach(function (g) {
       var members = [g.baseEffect].concat(g.variants);
       var isGroup = members.length > 1;
       var tierOk = passesTier(g);
       var res = tierOk ? members.filter(passesRow) : [];
       var out = members.filter(function (m) { return res.indexOf(m) === -1; });
-      if (res.length) { resHtml += groupWrap(g, isGroup, res); shown += res.length; }
-      if (out.length) { outHtml += groupWrap(g, isGroup, out); dimmed += out.length; }
+      if (res.length) { resHtml += groupWrap(g, isGroup, res, filtering); shown += res.length; }
+      if (out.length) { outHtml += groupWrap(g, isGroup, out, false); dimmed += out.length; }
     });
     var html = resHtml || '<p class="empty">No effects match these filters.</p>';
     if (outHtml) html += '<div class="group-head fo-label">Filtered out</div>' +
