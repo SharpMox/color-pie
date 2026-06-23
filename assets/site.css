@@ -1,0 +1,99 @@
+/* ============================================================
+ *  site.css — shared baseline for the Color Pie Explorer.
+ *  Palette (light + dark), base typography, header + theme
+ *  toggle, MTG colour tokens. Mobile-first.
+ *
+ *  Page-specific styles (row list, filters, detail dialog) stay
+ *  inline on each page. Palette/tokens adapted from NO-KINGS.
+ * ============================================================ */
+
+/* ============== Theme ============== */
+:root {
+  --bg: #eef0f3;
+  --surface: #ffffff;
+  --surface-2: #f5f6f9;
+  --text: #161a20;
+  --text-soft: #5b6573;
+  --border: #d8dce3;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.05);
+  --accent: #2659a8;
+
+  /* MTG colour tokens (W/U/B/R/G/C) */
+  --c-W: #f4e8c1; --c-W-ink: #5c4a16;
+  --c-U: #2a6fb5; --c-U-ink: #ffffff;
+  --c-B: #4b4753; --c-B-ink: #ffffff;
+  --c-R: #c4453f; --c-R-ink: #ffffff;
+  --c-G: #2f9a63; --c-G-ink: #ffffff;
+  --c-C: #b9c0cc; --c-C-ink: #2a2f38;
+
+  /* Tier accents */
+  --tier-primary: #2da06b;
+  --tier-secondary: #da802a;
+  --tier-tertiary: #8a8f99;
+}
+
+[data-theme="dark"] {
+  --bg: #0f1a2e;
+  --surface: #18243d;
+  --surface-2: #14203a;
+  --text: #dce4f0;
+  --text-soft: #8fa0b8;
+  --border: #2a3a55;
+  --shadow: 0 1px 3px rgba(0,0,0,0.45), 0 8px 24px rgba(0,0,0,0.35);
+  --accent: #7ec6ff;
+
+  --c-W: #d8caa0; --c-W-ink: #2a2310;
+  --c-U: #3f87cf; --c-U-ink: #07101d;
+  --c-B: #6a6577; --c-B-ink: #f2f0f7;
+  --c-R: #e0635c; --c-R-ink: #1b0807;
+  --c-G: #43b97c; --c-G-ink: #05140c;
+  --c-C: #8b94a3; --c-C-ink: #0c1119;
+
+  --tier-primary: #6dd6a8;
+  --tier-secondary: #ffae5c;
+  --tier-tertiary: #9aa3b0;
+}
+
+/* ============== Base ============== */
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  transition: background 0.2s ease, color 0.2s ease;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); }
+a:hover { text-decoration: underline; }
+
+/* ============== Header ============== */
+.site-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 50;
+}
+.site-header-inner {
+  max-width: 1100px; margin: 0 auto;
+  padding: 10px 16px;
+  display: flex; gap: 12px; align-items: center;
+}
+.site-title { font-size: 16px; font-weight: 700; margin: 0; }
+.site-title small { font-weight: 500; color: var(--text-soft); }
+.theme-toggle {
+  margin-left: auto;
+  width: 38px; height: 38px;
+  border: 1px solid var(--border); border-radius: 9px;
+  background: var(--surface-2); color: var(--text);
+  font-size: 17px; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.theme-toggle:hover { border-color: var(--accent); }
+
+/* ============== A11y ============== */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}

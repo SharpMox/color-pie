@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Color Pie Explorer — Effects by Color</title>
+<link rel="stylesheet" href="assets/site.css"/>
+<style>
+/* ===== Layout ===== */
+.wrap { max-width: 1100px; margin: 0 auto; padding: 14px 16px 60px; --cols: minmax(0,1fr) 88px 88px 88px; }
+
+/* ===== Controls ===== */
+.controls { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
+.ctl-label { font-size: 12px; font-weight: 600; color: var(--text-soft); text-transform: uppercase; letter-spacing: .04em; margin: 0 0 6px; }
+
+/* Colour picker */
+.picker { display: flex; flex-wrap: wrap; gap: 8px; }
+.pick {
+  min-width: 46px; min-height: 46px; padding: 0 10px;
+  border: 2px solid var(--col); border-radius: 12px;
+  background: var(--surface); color: var(--col);
+  font-size: 15px; font-weight: 700; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.pick[aria-pressed="true"] { border-color: var(--col); box-shadow: 0 0 0 2px var(--col) inset; background: var(--col); color: var(--col-ink); }
+.pick.W{--col:var(--c-W);--col-ink:var(--c-W-ink)} .pick.U{--col:var(--c-U);--col-ink:var(--c-U-ink)}
+.pick.B{--col:var(--c-B);--col-ink:var(--c-B-ink)} .pick.R{--col:var(--c-R);--col-ink:var(--c-R-ink)}
+.pick.G{--col:var(--c-G);--col-ink:var(--c-G-ink)} .pick.C{--col:var(--c-C);--col-ink:var(--c-C-ink)}
+
+/* Picker + search share a row on desktop, wrap to 2 lines on mobile */
+.pickrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.pickrow .picker { flex: 0 0 auto; }
+.search { flex: 1 1 260px; min-height: 46px; padding: 0 14px; font-size: 15px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--text); }
+
+/* Filter bar: TIER / Type / Category / More Filters on one wrapping row */
+.filterbar { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: flex-end; }
+.fld { display: flex; flex-direction: column; gap: 4px; }
+.fld > .ctl-label { margin: 0; }
+.seg { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+.seg button {
+  min-height: 38px; padding: 0 12px; border: 1px solid var(--border); border-radius: 999px;
+  background: var(--surface); color: var(--text-soft); font-size: 13px; font-weight: 600; cursor: pointer;
+}
+.seg button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+select.mini { min-height: 38px; padding: 0 10px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--text); font-size: 13px; font-weight: 600; cursor: pointer; }
+details.more { border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+details.more > summary { min-height: 38px; padding: 0 12px; display: flex; align-items: center; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text-soft); list-style: none; }
+details.more > summary::-webkit-details-marker { display: none; }
+details.more > summary::before { content: '☰ '; margin-right: 6px; }
+details.more[open] { flex-basis: 100%; padding: 0 12px 12px; }
+details.more .sub { font-size: 11px; font-weight: 700; color: var(--text-soft); text-transform: uppercase; margin: 10px 0 4px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { min-height: 34px; padding: 0 12px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--text-soft); font-size: 13px; font-weight: 600; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+.count { font-size: 13px; color: var(--text-soft); margin: 4px 0 6px; }
+
+/* ===== Column header + rows (shared grid template via --cols) ===== */
+.list-head, .row { display: grid; grid-template-columns: var(--cols); gap: 4px 8px; align-items: center; }
+.list-head {
+  position: sticky; top: 0; z-index: 40;
+  background: var(--bg); border-bottom: 1px solid var(--border);
+  padding: 8px 15px; margin-bottom: 6px;
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--text-soft);
+}
+.list-head .th-tier { text-align: center; }
+.list-head .abbr { display: none; }
+.list { display: flex; flex-direction: column; gap: 6px; }
+.group-head { display: flex; align-items: center; gap: 10px; margin: 14px 0 0; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-soft); }
+.group-head::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.group-head.fo-label { margin-top: 24px; }
+.filtered-out { display: flex; flex-direction: column; gap: 6px; opacity: .4; }
+/* Variant group: fieldset frames the rows; no horizontal padding so rows stay
+   column-aligned with the sticky header. */
+fieldset.group { display: flex; flex-direction: column; gap: 6px; border: 1px solid var(--border); border-radius: 12px; margin: 8px 0; padding: 6px 10px 10px; }
+fieldset.group > legend { margin-left: 10px; padding: 0 6px; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-soft); }
+.row {
+  width: 100%; text-align: left; cursor: pointer;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+  padding: 10px 14px; color: var(--text);
+}
+.row:hover { border-color: var(--accent); }
+.row.grouped { border-color: transparent; }
+.cell-main { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.row-name { font-size: 14.5px; font-weight: 600; }
+.row-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag { font-size: 11px; color: var(--text-soft); border: 1px solid var(--border); border-radius: 6px; padding: 1px 6px; }
+.tier-cell { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; }
+.badge {
+  font-size: 12px; font-weight: 700; border-radius: 999px; min-width: 24px; height: 24px; padding: 0 6px;
+  background: var(--col); color: var(--col-ink); display: inline-flex; align-items: center; justify-content: center;
+}
+.badge.W{--col:var(--c-W);--col-ink:var(--c-W-ink)} .badge.U{--col:var(--c-U);--col-ink:var(--c-U-ink)}
+.badge.B{--col:var(--c-B);--col-ink:var(--c-B-ink)} .badge.R{--col:var(--c-R);--col-ink:var(--c-R-ink)}
+.badge.G{--col:var(--c-G);--col-ink:var(--c-G-ink)} .badge.C{--col:var(--c-C);--col-ink:var(--c-C-ink)}
+.empty { color: var(--text-soft); padding: 30px 10px; text-align: center; }
+
+/* ===== Detail dialog ===== */
+dialog.detail { border: none; border-radius: 16px; padding: 0; background: var(--surface); color: var(--text); box-shadow: var(--shadow); max-width: 760px; width: calc(100% - 24px); }
+dialog.detail::backdrop { background: rgba(0,0,0,.5); }
+.detail-head { position: sticky; top: 0; background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 16px; display: flex; align-items: flex-start; gap: 10px; }
+.detail-head h2 { margin: 0; font-size: 18px; }
+.detail-head .tag { margin-top: 4px; }
+.detail-close { margin-left: auto; width: 38px; height: 38px; flex: none; border: 1px solid var(--border); border-radius: 9px; background: var(--surface-2); color: var(--text); font-size: 18px; cursor: pointer; }
+.detail-body { padding: 14px 16px 20px; }
+.detail-body .rationale { margin: 0 0 14px; color: var(--text); }
+.detail-meta { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 16px; }
+.color-sec { margin: 0 0 18px; }
+.color-sec h3 { font-size: 14px; margin: 0 0 8px; display: flex; align-items: center; gap: 8px; }
+.color-sec .tierlab { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+.tier-primary { background: var(--tier-primary); color: #06210f; }
+.tier-secondary { background: var(--tier-secondary); color: #2a1402; }
+.tier-tertiary { background: var(--tier-tertiary); color: #14171c; }
+.tier-off { background: transparent; color: var(--text-soft); border: 1px dashed var(--border); }
+.art-strip { display: flex; flex-wrap: wrap; gap: 12px; }
+fieldset.art { border: 1px solid var(--border); border-radius: 10px; margin: 0; padding: 8px; width: auto; text-align: center; }
+fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--text-soft); }
+.art img { width: 150px; border-radius: 9px; display: block; background: var(--surface-2); aspect-ratio: 488/680; object-fit: cover; }
+.art .cname { font-size: 12px; margin: 6px 0 0; }
+.no-art { color: var(--text-soft); font-size: 13px; }
+
+/* ===== Mobile: stack rows (name on top, tags + labeled P/S/T columns below) ===== */
+@media (max-width: 560px) {
+  .list-head { display: none; }                 /* tabular header doesn't map to stacked rows */
+  .row { grid-template-columns: repeat(3, 1fr); row-gap: 10px; padding: 12px; }
+  .cell-main { grid-column: 1 / -1; }            /* name + tags take the full first line */
+  .row-name { font-size: 13.5px; }
+  .tier-cell { display: block; text-align: center; }
+  .tier-cell::before { content: attr(data-label); display: block; font-size: 10px; font-weight: 700; color: var(--text-soft); margin-bottom: 3px; }
+  .tier-cell:empty::after { content: '—'; color: var(--text-soft); }
+  .badge { font-size: 11px; min-width: 20px; height: 20px; padding: 0 3px; }
+  /* Picker fills line 1 with 6 equal-width buttons (fits down to 320px),
+     search drops to line 2. */
+  .pickrow .picker { flex: 1 1 100%; gap: 4px; }
+  .pick { flex: 1 1 0; min-width: 0; padding: 0 4px; gap: 3px; font-size: 13px; }
+  .search { flex: 1 1 100%; }
+}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="site-header-inner">
+    <h1 class="site-title">Color Pie <small>· Effects by Color</small></h1>
+    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode" aria-pressed="false">◐</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="controls">
+    <div>
+      <p class="ctl-label">Pick colour(s)</p>
+      <div class="pickrow">
+        <div class="picker" id="picker"></div>
+        <input type="search" class="search" id="search" placeholder="Search effects, rationale, card names…" aria-label="Search effects"/>
+      </div>
+    </div>
+    <div class="filterbar">
+      <div class="fld">
+        <p class="ctl-label">Tier <span id="tier-note" class="tag" hidden>pick a colour first</span></p>
+        <div class="seg" id="tier">
+          <button data-tier="all" aria-pressed="true">All</button>
+          <button data-tier="primary" aria-pressed="false">Primary</button>
+          <button data-tier="secondary" aria-pressed="false">+ Secondary</button>
+          <button data-tier="tertiary" aria-pressed="false">In-pie</button>
+          <button data-tier="offpie" aria-pressed="false">Off-pie</button>
+        </div>
+      </div>
+      <div class="fld">
+        <p class="ctl-label">Type</p>
+        <select class="mini" id="f-type" aria-label="Filter by type"></select>
+      </div>
+      <div class="fld">
+        <p class="ctl-label">Category</p>
+        <select class="mini" id="f-cat" aria-label="Filter by category"></select>
+      </div>
+      <details class="more">
+        <summary>More Filters</summary>
+        <p class="sub">Interaction</p><div class="chips" id="f-interaction"></div>
+        <p class="sub">Duration</p><div class="chips" id="f-duration"></div>
+        <p class="sub">Base keyword</p><div class="chips" id="f-baseKeyword"></div>
+      </details>
+    </div>
+  </div>
+
+  <p class="count" id="count"></p>
+  <div class="list-head" id="list-head">
+    <span>Effect</span>
+    <span class="th-tier"><span class="full">Primary</span><span class="abbr">P</span></span>
+    <span class="th-tier"><span class="full">Secondary</span><span class="abbr">S</span></span>
+    <span class="th-tier"><span class="full">Tertiary</span><span class="abbr">T</span></span>
+  </div>
+  <div class="list" id="list"></div>
+</main>
+
+<dialog class="detail" id="detail">
+  <div class="detail-head">
+    <div>
+      <h2 id="d-title"></h2>
+      <span class="tag" id="d-type"></span>
+    </div>
+    <button class="detail-close" id="d-close" aria-label="Close">×</button>
+  </div>
+  <div class="detail-body" id="d-body"></div>
+</dialog>
+
+<script src="data/colorpie.js"></script>
+<script src="assets/theme.js"></script>
+<script>
+(function () {
+  var COLORS = [
+    { k:'W', name:'White',     glyph:'⚪' },
+    { k:'U', name:'Blue',      glyph:'🔵' },
+    { k:'B', name:'Black',     glyph:'⚫' },
+    { k:'R', name:'Red',       glyph:'🔴' },
+    { k:'G', name:'Green',     glyph:'🟢' },
+    { k:'C', name:'Colorless', glyph:'◇' }
+  ];
+  var TIERVAL = { primary:3, secondary:2, tertiary:1 };
+  var TIERWORD = { primary:'Primary', secondary:'Secondary', tertiary:'Tertiary' };
+  var ARCH = { onRate:'On-rate', cheapest:'Cheapest', iconic:'Iconic', bendBreak:'Bend/Break' };
+
+  // ----- State -----
+  var selected = new Set(['W','U','B','R','G','C']);   // all colours on by default
+  var tier = 'all';
+  var query = '';
+  var filt = { type:'', category:'', interaction:new Set(), duration:new Set(), baseKeyword:new Set() };
+
+  // ----- Build groups (base effect + its variants), first-appearance order -----
+  COLORPIE.forEach(function (e, i) { e._i = i; });
+  var byBase = {}, order = [];
+  COLORPIE.forEach(function (e) {
+    if (!byBase[e.base]) { byBase[e.base] = { base:e.base, baseEffect:null, variants:[] }; order.push(e.base); }
+    if (e.isVariant) byBase[e.base].variants.push(e); else byBase[e.base].baseEffect = e;
+  });
+  var GROUPS = order.map(function (b) { return byBase[b]; });
+  GROUPS.forEach(function (g) { if (!g.baseEffect) g.baseEffect = g.variants.shift(); }); // ponytail: orphan variant becomes anchor
+
+  // ----- Helpers -----
+  function bestTier(eff) { // numeric best tier across selected colours; -1 if no colours
+    if (!selected.size) return -1;
+    var b = 0;
+    selected.forEach(function (k) { b = Math.max(b, TIERVAL[eff.rank[k]] || 0); });
+    return b;
+  }
+  function inPieCount(eff) {
+    var n = 0; selected.forEach(function (k) { if (eff.rank[k]) n++; }); return n;
+  }
+  function haystack(e) {
+    var s = e.title + ' ' + (e.rationale || '') + ' ' + (e.category || '');
+    Object.keys(e.cards || {}).forEach(function (k) {
+      var c = e.cards[k]; for (var a in c) if (c[a]) s += ' ' + c[a];
+    });
+    return s.toLowerCase();
+  }
+  // CARDS maps card name -> bare Scryfall id (or a full URL fallback); rebuild the image URL.
+  function cardImg(name) {
+    var v = CARDS[name];
+    if (!v) return '';
+    return /^https?:/.test(v) ? v
+      : 'https://cards.scryfall.io/normal/front/' + v[0] + '/' + v[1] + '/' + v + '.jpg';
+  }
+  function passesRow(e) { // text + type + category + keyword metadata (NOT tier — tier is group-level)
+    if (query && haystack(e).indexOf(query) === -1) return false;
+    if (filt.type && e.type !== filt.type) return false;
+    if (filt.category && e.category !== filt.category) return false;
+    if (filt.interaction.size && !filt.interaction.has(e.interaction)) return false;
+    if (filt.duration.size && !filt.duration.has(e.duration)) return false;
+    if (filt.baseKeyword.size && !filt.baseKeyword.has(e.baseKeyword)) return false;
+    return true;
+  }
+  function passesTier(g) {
+    if (!selected.size || tier === 'all') return true;
+    var b = bestTier(g.baseEffect);
+    if (tier === 'primary')   return b === 3;
+    if (tier === 'secondary') return b >= 2;
+    if (tier === 'tertiary')  return b >= 1;   // any in-pie
+    if (tier === 'offpie')    return b === 0;
+    return true;
+  }
+
+  // ----- Sort groups: in-pie to top, else neutral (category, title) -----
+  function sortGroups(gs) {
+    return gs.slice().sort(function (a, b) {
+      if (selected.size) {
+        var d = bestTier(b.baseEffect) - bestTier(a.baseEffect); if (d) return d;
+        var c = inPieCount(b.baseEffect) - inPieCount(a.baseEffect); if (c) return c;
+      } else {
+        var ca = (a.baseEffect.category || ''), cb = (b.baseEffect.category || '');
+        if (ca !== cb) return ca < cb ? -1 : 1;
+      }
+      return a.base < b.base ? -1 : a.base > b.base ? 1 : 0;
+    });
+  }
+
+  // ----- Render rows -----
+  // Three tier cells (Primary/Secondary/Tertiary); each holds colour-only pills
+  // for the selected colours sitting at that tier for this effect. Off-pie
+  // selected colours appear in no cell.
+  function tierCells(eff) {
+    var buckets = { primary: [], secondary: [], tertiary: [] };
+    COLORS.forEach(function (c) {
+      if (!selected.has(c.k)) return;
+      var t = eff.rank[c.k];
+      if (t && buckets[t]) buckets[t].push(c);
+    });
+    var LABEL = { primary: 'P', secondary: 'S', tertiary: 'T' };
+    return ['primary','secondary','tertiary'].map(function (tk) {
+      var pills = buckets[tk].map(function (c) {
+        return '<span class="badge ' + c.k + '" title="' + c.name + '"></span>';
+      }).join('');
+      return '<div class="tier-cell" data-label="' + LABEL[tk] + '">' + pills + '</div>';
+    }).join('');
+  }
+  function rowHTML(e, grouped) {
+    return '<button class="row' + (grouped ? ' grouped' : '') + '" data-eff="' + e._i + '">' +
+      '<div class="cell-main"><span class="row-name">' + esc(e.title) + '</span>' +
+      '<span class="row-tags"><span class="tag">' + esc(e.type) + '</span>' +
+      (e.category ? '<span class="tag">' + esc(e.category) + '</span>' : '') + '</span></div>' +
+      tierCells(e) +
+    '</button>';
+  }
+  // Colour picker only sorts (never filters). Every other filter (tier, type,
+  // category, keyword, search) partitions effects into results (full opacity) and
+  // filtered-out (dimmed, beneath) — nothing is ever fully hidden.
+  // multi-variant groups are framed in a fieldset (legend = base name); single
+  // effects render as a bare row.
+  function groupWrap(g, isGroup, rows) {
+    var inner = rows.map(function (e) { return rowHTML(e, isGroup); }).join('');
+    return isGroup ? '<fieldset class="group"><legend>' + esc(g.base) + '</legend>' + inner + '</fieldset>' : inner;
+  }
+  function render() {
+    var resHtml = '', outHtml = '', shown = 0, dimmed = 0;
+    sortGroups(GROUPS).forEach(function (g) {
+      var members = [g.baseEffect].concat(g.variants);
+      var isGroup = members.length > 1;
+      var tierOk = passesTier(g);
+      var res = tierOk ? members.filter(passesRow) : [];
+      var out = members.filter(function (m) { return res.indexOf(m) === -1; });
+      if (res.length) { resHtml += groupWrap(g, isGroup, res); shown += res.length; }
+      if (out.length) { outHtml += groupWrap(g, isGroup, out); dimmed += out.length; }
+    });
+    var html = resHtml || '<p class="empty">No effects match these filters.</p>';
+    if (outHtml) html += '<div class="group-head fo-label">Filtered out</div>' +
+      '<div class="filtered-out">' + outHtml + '</div>';
+    document.getElementById('list').innerHTML = html;
+    document.getElementById('count').textContent =
+      shown + ' effect' + (shown === 1 ? '' : 's') +
+      (dimmed ? ' · ' + dimmed + ' filtered out' : '') +
+      (selected.size ? ' · sorted by rank in ' + [...selected].join('') : ' · neutral order');
+  }
+
+  // ----- Detail dialog -----
+  function detailHTML(eff) {
+    var cols = selected.size
+      ? COLORS.filter(function (c) { return selected.has(c.k); })
+      : COLORS;
+    var meta = [['Interaction', eff.interaction], ['Duration', eff.duration], ['Base keyword', eff.baseKeyword]]
+      .filter(function (m) { return m[1]; })
+      .map(function (m) { return '<span class="tag">' + m[0] + ': ' + esc(m[1]) + '</span>'; }).join('');
+    // order sections by this effect's tier: Primary, Secondary, Tertiary, then off-pie
+    // (stable sort keeps WUBRG order within each tier)
+    var TORDER = { primary: 0, secondary: 1, tertiary: 2 };
+    var trank = function (c) { var v = TORDER[eff.rank[c.k]]; return v == null ? 3 : v; };
+    var secs = cols.slice().sort(function (a, b) { return trank(a) - trank(b); }).map(function (c) {
+      var t = eff.rank[c.k];
+      var picks = t ? ['onRate','cheapest','iconic'] : ['bendBreak'];
+      var cell = eff.cards[c.k] || {};
+      var arts = picks.filter(function (p) { return cell[p]; }).map(function (p) {
+        var name = cell[p], img = cardImg(name);
+        return '<fieldset class="art"><legend>' + ARCH[p] + '</legend>' +
+          (img ? '<img loading="lazy" src="' + esc(img) + '" alt="' + esc(name) + '"/>' : '') +
+          '<p class="cname">' + esc(name) + '</p></fieldset>';
+      }).join('');
+      var lab = t ? '<span class="tierlab tier-' + t + '">' + TIERWORD[t] + '</span>'
+                  : '<span class="tierlab tier-off">Off-pie</span>';
+      return '<div class="color-sec"><h3><span class="badge ' + c.k + '" title="' + c.name + '"></span>' + c.name + lab + '</h3>' +
+        (arts ? '<div class="art-strip">' + arts + '</div>' : '<p class="no-art">No example card.</p>') + '</div>';
+    }).join('');
+    return '<p class="rationale">' + esc(eff.rationale || '') + '</p>' +
+      (meta ? '<div class="detail-meta">' + meta + '</div>' : '') + secs;
+  }
+  var dlg = document.getElementById('detail');
+  function openDetail(i) {
+    var eff = COLORPIE[i];
+    document.getElementById('d-title').textContent = eff.title;
+    document.getElementById('d-type').textContent = eff.type + (eff.category ? ' · ' + eff.category : '');
+    document.getElementById('d-body').innerHTML = detailHTML(eff);
+    if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open','');
+  }
+  document.getElementById('d-close').addEventListener('click', function () { dlg.close(); });
+  dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); }); // backdrop
+
+  // ----- Wire controls -----
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]; }); }
+
+  // colour picker
+  var pickerEl = document.getElementById('picker');
+  pickerEl.innerHTML = COLORS.map(function (c) {
+    return '<button class="pick ' + c.k + '" data-k="' + c.k + '" title="' + c.name + '" aria-pressed="' + (selected.has(c.k) ? 'true' : 'false') + '">' + c.k + '</button>';
+  }).join('');
+  pickerEl.addEventListener('click', function (e) {
+    var b = e.target.closest('.pick'); if (!b) return;
+    var k = b.dataset.k;
+    if (selected.has(k)) selected.delete(k); else selected.add(k);
+    b.setAttribute('aria-pressed', selected.has(k) ? 'true' : 'false');
+    document.getElementById('tier-note').hidden = selected.size > 0;
+    render();
+  });
+  document.getElementById('tier-note').hidden = selected.size > 0;
+
+  // search
+  document.getElementById('search').addEventListener('input', function (e) {
+    query = e.target.value.trim().toLowerCase(); render();
+  });
+
+  // tier segmented (single-select)
+  var tierEl = document.getElementById('tier');
+  tierEl.addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    tier = b.dataset.tier;
+    [].forEach.call(tierEl.children, function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+    render();
+  });
+
+  // multi-select chip groups
+  function buildChips(elId, values, dim) {
+    var el = document.getElementById(elId);
+    el.innerHTML = values.map(function (v) {
+      return '<button class="chip" data-v="' + esc(v) + '" aria-pressed="false">' + esc(v) + '</button>';
+    }).join('');
+    el.addEventListener('click', function (e) {
+      var b = e.target.closest('.chip'); if (!b) return;
+      var v = b.dataset.v;
+      if (filt[dim].has(v)) filt[dim].delete(v); else filt[dim].add(v);
+      b.setAttribute('aria-pressed', filt[dim].has(v) ? 'true' : 'false');
+      render();
+    });
+  }
+  function uniq(getter) {
+    var s = []; COLORPIE.forEach(function (e) { var v = getter(e); if (v && s.indexOf(v) === -1) s.push(v); });
+    return s.sort();
+  }
+  // single-select native dropdowns ('' = All)
+  function fillSelect(id, values, key) {
+    var el = document.getElementById(id);
+    el.innerHTML = '<option value="">All</option>' + values.map(function (v) {
+      return '<option value="' + esc(v) + '">' + esc(v) + '</option>';
+    }).join('');
+    el.addEventListener('change', function () { filt[key] = el.value; render(); });
+  }
+  fillSelect('f-type', uniq(function (e) { return e.type; }),     'type');
+  fillSelect('f-cat',  uniq(function (e) { return e.category; }), 'category');
+  buildChips('f-interaction', uniq(function (e) { return e.interaction; }), 'interaction');
+  buildChips('f-duration',    uniq(function (e) { return e.duration; }),    'duration');
+  buildChips('f-baseKeyword', uniq(function (e) { return e.baseKeyword; }), 'baseKeyword');
+
+  // row click → detail (delegation)
+  document.getElementById('list').addEventListener('click', function (e) {
+    var r = e.target.closest('.row'); if (!r) return;
+    openDetail(+r.dataset.eff);
+  });
+
+  // park the sticky column header just under the sticky site header
+  var siteHeader = document.querySelector('.site-header');
+  var listHead = document.getElementById('list-head');
+  function setStickyTop() { if (siteHeader && listHead) listHead.style.top = siteHeader.offsetHeight + 'px'; }
+  setStickyTop();
+  window.addEventListener('resize', setStickyTop);
+
+  render();
+
+  // ----- ponytail self-check (data-independent): silent on pass, logs on regression -----
+  (function selftest() {
+    var save = selected;                  // restore after — don't desync the rendered picker
+    selected = new Set(['U']);
+    var hi = { base: '_hi', baseEffect: { base: '_hi', category: '', rank: { U: 'primary' } } };
+    var lo = { base: '_lo', baseEffect: { base: '_lo', category: '', rank: { U: null } } };
+    console.assert(bestTier(hi.baseEffect) === 3, 'primary tier = 3');
+    console.assert(bestTier(lo.baseEffect) === 0, 'off-pie tier = 0');
+    console.assert(sortGroups([lo, hi])[0] === hi, 'in-pie sorts above off-pie');
+    selected = save;
+  })();
+})();
+</script>
+</body>
+</html>
