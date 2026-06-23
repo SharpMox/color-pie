@@ -70,13 +70,17 @@ details.more .sub { font-size: 11px; font-weight: 700; color: var(--text-soft); 
 .group-head::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 .group-head.fo-label { margin-top: 24px; }
 .filtered-out { display: flex; flex-direction: column; gap: 6px; opacity: .4; }
+/* Variant group: fieldset frames the rows; no horizontal padding so rows stay
+   column-aligned with the sticky header. */
+fieldset.group { display: flex; flex-direction: column; gap: 6px; border: 1px solid var(--border); border-radius: 12px; margin: 8px 0; padding: 6px 10px 10px; }
+fieldset.group > legend { margin-left: 10px; padding: 0 6px; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-soft); }
 .row {
   width: 100%; text-align: left; cursor: pointer;
   background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
   padding: 10px 14px; color: var(--text);
 }
 .row:hover { border-color: var(--accent); }
-.row.grouped { background: var(--surface-2); }
+.row.grouped { border-color: transparent; }
 .cell-main { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .row-name { font-size: 14.5px; font-weight: 600; }
 .row-tags { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -109,19 +113,21 @@ dialog.detail::backdrop { background: rgba(0,0,0,.5); }
 .tier-tertiary { background: var(--tier-tertiary); color: #14171c; }
 .tier-off { background: transparent; color: var(--text-soft); border: 1px dashed var(--border); }
 .art-strip { display: flex; flex-wrap: wrap; gap: 12px; }
-.art { width: 150px; }
+fieldset.art { border: 1px solid var(--border); border-radius: 10px; margin: 0; padding: 8px; width: auto; text-align: center; }
+fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--text-soft); }
 .art img { width: 150px; border-radius: 9px; display: block; background: var(--surface-2); aspect-ratio: 488/680; object-fit: cover; }
-.art .arch { font-size: 11px; font-weight: 700; color: var(--text-soft); margin: 4px 0 0; }
-.art .cname { font-size: 12px; }
+.art .cname { font-size: 12px; margin: 6px 0 0; }
 .no-art { color: var(--text-soft); font-size: 13px; }
 
-/* ===== Mobile: narrower tier columns, abbreviated header labels ===== */
+/* ===== Mobile: stack rows (name on top, tags + labeled P/S/T columns below) ===== */
 @media (max-width: 560px) {
-  .wrap { --cols: minmax(0,1fr) 46px 46px 46px; }
-  .list-head { padding: 6px 11px; }
-  .row { padding: 10px; }
-  .list-head .full { display: none; }
-  .list-head .abbr { display: inline; }
+  .list-head { display: none; }                 /* tabular header doesn't map to stacked rows */
+  .row { grid-template-columns: repeat(3, 1fr); row-gap: 10px; padding: 12px; }
+  .cell-main { grid-column: 1 / -1; }            /* name + tags take the full first line */
+  .row-name { font-size: 13.5px; }
+  .tier-cell { display: block; text-align: center; }
+  .tier-cell::before { content: attr(data-label); display: block; font-size: 10px; font-weight: 700; color: var(--text-soft); margin-bottom: 3px; }
+  .tier-cell:empty::after { content: '—'; color: var(--text-soft); }
   .badge { font-size: 11px; min-width: 20px; height: 20px; padding: 0 3px; }
   /* Picker fills line 1 with 6 equal-width buttons (fits down to 320px),
      search drops to line 2. */
@@ -297,11 +303,12 @@ dialog.detail::backdrop { background: rgba(0,0,0,.5); }
       var t = eff.rank[c.k];
       if (t && buckets[t]) buckets[t].push(c);
     });
+    var LABEL = { primary: 'P', secondary: 'S', tertiary: 'T' };
     return ['primary','secondary','tertiary'].map(function (tk) {
       var pills = buckets[tk].map(function (c) {
         return '<span class="badge ' + c.k + '" title="' + c.name + '"></span>';
       }).join('');
-      return '<div class="tier-cell">' + pills + '</div>';
+      return '<div class="tier-cell" data-label="' + LABEL[tk] + '">' + pills + '</div>';
     }).join('');
   }
   function rowHTML(e, grouped) {
@@ -315,6 +322,12 @@ dialog.detail::backdrop { background: rgba(0,0,0,.5); }
   // Colour picker only sorts (never filters). Every other filter (tier, type,
   // category, keyword, search) partitions effects into results (full opacity) and
   // filtered-out (dimmed, beneath) — nothing is ever fully hidden.
+  // multi-variant groups are framed in a fieldset (legend = base name); single
+  // effects render as a bare row.
+  function groupWrap(g, isGroup, rows) {
+    var inner = rows.map(function (e) { return rowHTML(e, isGroup); }).join('');
+    return isGroup ? '<fieldset class="group"><legend>' + esc(g.base) + '</legend>' + inner + '</fieldset>' : inner;
+  }
   function render() {
     var resHtml = '', outHtml = '', shown = 0, dimmed = 0;
     sortGroups(GROUPS).forEach(function (g) {
@@ -323,14 +336,8 @@ dialog.detail::backdrop { background: rgba(0,0,0,.5); }
       var tierOk = passesTier(g);
       var res = tierOk ? members.filter(passesRow) : [];
       var out = members.filter(function (m) { return res.indexOf(m) === -1; });
-      if (res.length) {
-        if (isGroup) resHtml += '<div class="group-head">' + esc(g.base) + '</div>';
-        res.forEach(function (e) { resHtml += rowHTML(e, isGroup); shown++; });
-      }
-      if (out.length) {
-        if (isGroup) outHtml += '<div class="group-head">' + esc(g.base) + '</div>';
-        out.forEach(function (e) { outHtml += rowHTML(e, isGroup); dimmed++; });
-      }
+      if (res.length) { resHtml += groupWrap(g, isGroup, res); shown += res.length; }
+      if (out.length) { outHtml += groupWrap(g, isGroup, out); dimmed += out.length; }
     });
     var html = resHtml || '<p class="empty">No effects match these filters.</p>';
     if (outHtml) html += '<div class="group-head fo-label">Filtered out</div>' +
@@ -360,9 +367,9 @@ dialog.detail::backdrop { background: rgba(0,0,0,.5); }
       var cell = eff.cards[c.k] || {};
       var arts = picks.filter(function (p) { return cell[p]; }).map(function (p) {
         var name = cell[p], img = cardImg(name);
-        return '<div class="art">' +
+        return '<fieldset class="art"><legend>' + ARCH[p] + '</legend>' +
           (img ? '<img loading="lazy" src="' + esc(img) + '" alt="' + esc(name) + '"/>' : '') +
-          '<p class="arch">' + ARCH[p] + '</p><p class="cname">' + esc(name) + '</p></div>';
+          '<p class="cname">' + esc(name) + '</p></fieldset>';
       }).join('');
       var lab = t ? '<span class="tierlab tier-' + t + '">' + TIERWORD[t] + '</span>'
                   : '<span class="tierlab tier-off">Off-pie</span>';
