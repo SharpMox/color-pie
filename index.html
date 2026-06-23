@@ -242,9 +242,16 @@ dialog.detail::backdrop { background: rgba(0,0,0,.5); }
   function haystack(e) {
     var s = e.title + ' ' + (e.rationale || '') + ' ' + (e.category || '');
     Object.keys(e.cards || {}).forEach(function (k) {
-      var c = e.cards[k]; for (var a in c) if (c[a]) s += ' ' + c[a].name;
+      var c = e.cards[k]; for (var a in c) if (c[a]) s += ' ' + c[a];
     });
     return s.toLowerCase();
+  }
+  // CARDS maps card name -> bare Scryfall id (or a full URL fallback); rebuild the image URL.
+  function cardImg(name) {
+    var v = CARDS[name];
+    if (!v) return '';
+    return /^https?:/.test(v) ? v
+      : 'https://cards.scryfall.io/normal/front/' + v[0] + '/' + v[1] + '/' + v + '.jpg';
   }
   function passesRow(e) { // text + type + category + keyword metadata (NOT tier — tier is group-level)
     if (query && haystack(e).indexOf(query) === -1) return false;
@@ -352,9 +359,10 @@ dialog.detail::backdrop { background: rgba(0,0,0,.5); }
       var picks = t ? ['onRate','cheapest','iconic'] : ['bendBreak'];
       var cell = eff.cards[c.k] || {};
       var arts = picks.filter(function (p) { return cell[p]; }).map(function (p) {
-        var card = cell[p];
-        return '<div class="art"><img loading="lazy" src="' + esc(card.img) + '" alt="' + esc(card.name) + '"/>' +
-          '<p class="arch">' + ARCH[p] + '</p><p class="cname">' + esc(card.name) + '</p></div>';
+        var name = cell[p], img = cardImg(name);
+        return '<div class="art">' +
+          (img ? '<img loading="lazy" src="' + esc(img) + '" alt="' + esc(name) + '"/>' : '') +
+          '<p class="arch">' + ARCH[p] + '</p><p class="cname">' + esc(name) + '</p></div>';
       }).join('');
       var lab = t ? '<span class="tierlab tier-' + t + '">' + TIERWORD[t] + '</span>'
                   : '<span class="tierlab tier-off">Off-pie</span>';
