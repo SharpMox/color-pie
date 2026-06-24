@@ -3,7 +3,7 @@
 //
 // Join:
 //   - Example Cards:  card name -> image URL
-//   - Effects Rankings (by Effect title) -> per-colour tier {W..C: primary|secondary|tertiary|null}
+//   - Effects Rankings (by Effect title) -> per-color tier {W..C: primary|secondary|tertiary|null}
 //   - Effects: each row -> one effect; tier looked up via its `Ranking` relation
 //     (canonical base title), which also groups variants under their base.
 'use strict';
@@ -57,12 +57,12 @@ const scryId = url => { const m = SCRY_ID.exec(url || ''); return m ? m[0] : (ur
 const used = new Set();
 const pick = name => { if (name) used.add(name); return name || undefined; };
 
-// ---- Effects Rankings: effect title -> tier per colour ----
+// ---- Effects Rankings: effect title -> tier per color ----
 const rankByEffect = {};
 read('Effects Rankings.csv').forEach(r => {
   if (!r['Effect']) return;
   const rank = EMPTY_RANK();
-  // apply weakest first so Primary wins if a colour appears twice
+  // apply weakest first so Primary wins if a color appears twice
   [['Tertiary','tertiary'], ['Secondary','secondary'], ['Primary','primary']].forEach(([col, tier]) => {
     relNames(r[col]).forEach(cn => { const k = CNAME2KEY[cn]; if (k) rank[k] = tier; });
   });

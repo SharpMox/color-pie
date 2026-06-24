@@ -1,7 +1,7 @@
 /* ============================================================
  *  site.css — shared baseline for the Color Pie Explorer.
  *  Palette (light + dark), base typography, header + theme
- *  toggle, MTG colour tokens. Mobile-first.
+ *  toggle, MTG color tokens. Mobile-first.
  *
  *  Page-specific styles (row list, filters, detail dialog) stay
  *  inline on each page. Palette/tokens adapted from NO-KINGS.
@@ -18,7 +18,7 @@
   --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.05);
   --accent: #2659a8; --accent-ink: #ffffff;
 
-  /* MTG colour tokens (W/U/B/R/G/C) */
+  /* MTG color tokens (W/U/B/R/G/C) */
   --c-W: #f4e8c1; --c-W-ink: #5c4a16;
   --c-U: #2a6fb5; --c-U-ink: #ffffff;
   --c-B: #4b4753; --c-B-ink: #ffffff;

@@ -13,7 +13,7 @@
 .controls { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
 .ctl-label { font-size: 12px; font-weight: 600; color: var(--text-soft); text-transform: uppercase; letter-spacing: .04em; margin: 0 0 6px; }
 
-/* Colour picker */
+/* Color picker */
 .picker { display: flex; flex-wrap: wrap; gap: 8px; }
 .pick {
   min-width: 46px; min-height: 46px; padding: 0 10px;
@@ -161,7 +161,7 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
 <main class="wrap">
   <div class="controls">
     <div>
-      <p class="ctl-label">Pick colour(s)</p>
+      <p class="ctl-label">Pick color(s)</p>
       <div class="pickrow">
         <div class="picker" id="picker"></div>
         <input type="search" class="search" id="search" placeholder="Search effects, rationale, card names…" aria-label="Search effects"/>
@@ -169,7 +169,7 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
     </div>
     <div class="filterbar">
       <div class="fld">
-        <p class="ctl-label">Tier <span id="tier-note" class="tag" hidden>pick a colour first</span></p>
+        <p class="ctl-label">Tier <span id="tier-note" class="tag" hidden>pick a color first</span></p>
         <div class="seg" id="tier">
           <button data-tier="all" aria-pressed="true">All</button>
           <button data-tier="primary" aria-pressed="false">Primary</button>
@@ -232,7 +232,7 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
   var ARCH = { onRate:'On-rate', cheapest:'Cheapest', iconic:'Iconic', bendBreak:'Bend/Break' };
 
   // ----- State -----
-  var selected = new Set(['W','U','B','R','G','C']);   // all colours on by default
+  var selected = new Set(['W','U','B','R','G','C']);   // all colors on by default
   var tier = 'all';
   var query = '';
   var filt = { type:'', category:'', interaction:new Set(), duration:new Set(), baseKeyword:new Set() };
@@ -271,10 +271,10 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
     if (filt.baseKeyword.size && !filt.baseKeyword.has(e.baseKeyword)) return false;
     return true;
   }
-  // Colour filter (never sorts): no filter when all/none selected; else keep effects whose
-  // pie includes a selected colour (at the chosen tier, or any tier when tier === 'all').
+  // Color filter (never sorts): no filter when all/none selected; else keep effects whose
+  // pie includes a selected color (at the chosen tier, or any tier when tier === 'all').
   function passesTier(g) {
-    if (!selected.size) return false;                  // no colours → dim all, prompt to pick
+    if (!selected.size) return false;                  // no colors → dim all, prompt to pick
     if (selected.size === COLORS.length) return true;
     var rank = g.baseEffect.rank;
     if (tier === 'offpie') { for (var k of selected) if (rank[k]) return false; return true; }
@@ -283,12 +283,12 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
   }
 
   // ----- Render rows -----
-  // Three tier cells (Primary/Secondary/Tertiary); each holds colour-only pills
-  // for the selected colours sitting at that tier for this effect. Off-pie
-  // selected colours appear in no cell.
+  // Three tier cells (Primary/Secondary/Tertiary); each holds color-only pills
+  // for the selected colors sitting at that tier for this effect. Off-pie
+  // selected colors appear in no cell.
   function tierCells(eff) {
     var buckets = { primary: [], secondary: [], tertiary: [] };
-    COLORS.forEach(function (c) {   // always show every colour's tier, regardless of picker
+    COLORS.forEach(function (c) {   // always show every color's tier, regardless of picker
       var t = eff.rank[c.k];
       if (t && buckets[t]) buckets[t].push(c);
     });
@@ -308,7 +308,7 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
       tierCells(e) +
     '</button>';
   }
-  // Colour picker only sorts (never filters). Every other filter (tier, type,
+  // Color picker only sorts (never filters). Every other filter (tier, type,
   // category, keyword, search) partitions effects into results (full opacity) and
   // filtered-out (dimmed, beneath) — nothing is ever fully hidden.
   // multi-variant groups are a collapsible <details> (summary = base name),
@@ -327,7 +327,7 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
     var resHtml = '', outHtml = '', shown = 0, dimmed = 0;
     // groups collapse by default; any active filter/search auto-opens matching groups
     var filtering = !!query;   // only the search box auto-expands groups
-    GROUPS.forEach(function (g) {   // natural data order; colour picker filters, never sorts
+    GROUPS.forEach(function (g) {   // natural data order; color picker filters, never sorts
       var members = [g.baseEffect].concat(g.variants);
       var isGroup = members.length > 1;
       var tierOk = passesTier(g);
@@ -337,7 +337,7 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
       if (out.length) { outHtml += groupWrap(g, isGroup, out, false); dimmed += out.length; }
     });
     var html = resHtml || '<p class="empty">' +
-      (selected.size ? 'No effects match these filters.' : 'Pick one or more colours to see effects.') + '</p>';
+      (selected.size ? 'No effects match these filters.' : 'Pick one or more colors to see effects.') + '</p>';
     if (outHtml) html += '<div class="group-head fo-label">Filtered out</div>' +
       '<div class="filtered-out">' + outHtml + '</div>';
     document.getElementById('list').innerHTML = html;
@@ -390,7 +390,7 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
   // ----- Wire controls -----
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]; }); }
 
-  // colour picker
+  // color picker
   var pickerEl = document.getElementById('picker');
   pickerEl.innerHTML = COLORS.map(function (c) {
     return '<button class="pick ' + c.k + '" data-k="' + c.k + '" title="' + c.name + '" aria-pressed="' + (selected.has(c.k) ? 'true' : 'false') + '">' + c.k + '</button>';
@@ -403,7 +403,7 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
     document.getElementById('tier-note').hidden = selected.size > 0;
     render();
   });
-  // double-click a colour = solo it (deactivate all others)
+  // double-click a color = solo it (deactivate all others)
   pickerEl.addEventListener('dblclick', function (e) {
     var b = e.target.closest('.pick'); if (!b) return;
     var k = b.dataset.k;
@@ -480,11 +480,11 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
   // ----- ponytail self-check (data-independent): silent on pass, logs on regression -----
   (function selftest() {
     var save = selected;                  // restore after — don't desync the rendered picker
-    selected = new Set(['U']);            // strict subset → colour filter active
-    console.assert(passesTier({ baseEffect: { rank: { U: 'primary' } } }), 'in-pie passes colour filter');
+    selected = new Set(['U']);            // strict subset → color filter active
+    console.assert(passesTier({ baseEffect: { rank: { U: 'primary' } } }), 'in-pie passes color filter');
     console.assert(!passesTier({ baseEffect: { rank: { U: null } } }), 'off-pie filtered out');
     selected = new Set();
-    console.assert(!passesTier({ baseEffect: { rank: {} } }), 'no colours dims all');
+    console.assert(!passesTier({ baseEffect: { rank: {} } }), 'no colors dims all');
     selected = save;
   })();
 })();
