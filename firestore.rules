@@ -1,24 +1,40 @@
 rules_version = '2';
-// Open comment wall for effect feedback: anyone may read, and create a single
-// validated document. No updates/deletes from clients — moderate from the
-// Firebase console. Paste into Firestore → Rules, or deploy with the CLI.
+// Effect feedback: anyone may read and create one validated comment (4 free-text
+// fields, ≥1 filled). Only the owner (signed in via Google) may update status/reply
+// to moderate. No client deletes. Deploy: firebase deploy --only firestore:rules
 service cloud.firestore {
   match /databases/{database}/documents {
     match /feedback/{id} {
       allow read: if true;
-      allow update, delete: if false;
-      allow create: if isValid(request.resource.data);
+      allow create: if isValidCreate(request.resource.data);
+      allow update: if isOwner() && isModeration(request.resource.data, resource.data);
+      allow delete: if false;
     }
   }
 }
 
-function isValid(d) {
-  return d.keys().hasOnly(['effectId','verdict','suggestedColors','suggestedStrength','note','reviewerName','createdAt'])
+function strOk(d, f, max) {
+  return !(f in d) || (d[f] is string && d[f].size() <= max);
+}
+function nonEmpty(d, f) {
+  return (f in d) && d[f] is string && d[f].size() > 0;
+}
+function isValidCreate(d) {
+  return d.keys().hasOnly(['effectId','colorTiers','cardExamples','scopeDuplicate','otherMetadata','reviewerName','createdAt'])
     && d.effectId is string && d.effectId.size() > 0 && d.effectId.size() <= 40
-    && d.verdict in ['correct','wrong_color','wrong_strength','borderline']
-    && (!('suggestedColors' in d) || (d.suggestedColors is list && d.suggestedColors.size() <= 6))
-    && (!('suggestedStrength' in d) || d.suggestedStrength in ['primary','secondary','tertiary','bend','break'])
-    && (!('note' in d) || (d.note is string && d.note.size() <= 1000))
-    && (!('reviewerName' in d) || (d.reviewerName is string && d.reviewerName.size() <= 80))
+    && strOk(d,'colorTiers',1000) && strOk(d,'cardExamples',1000)
+    && strOk(d,'scopeDuplicate',1000) && strOk(d,'otherMetadata',1000)
+    && strOk(d,'reviewerName',80)
+    && (nonEmpty(d,'colorTiers') || nonEmpty(d,'cardExamples') || nonEmpty(d,'scopeDuplicate') || nonEmpty(d,'otherMetadata'))
     && d.createdAt == request.time;
+}
+function isOwner() {
+  return request.auth != null
+    && request.auth.token.email == 'charp.max@gmail.com'
+    && request.auth.token.email_verified == true;
+}
+function isModeration(d, prev) {
+  return d.diff(prev).affectedKeys().hasOnly(['status','reply'])
+    && (!('status' in d) || d.status in ['pending','accepted','rejected'])
+    && (!('reply' in d) || (d.reply is string && d.reply.size() <= 1000));
 }

@@ -14,7 +14,11 @@ const firebaseConfig = {
   projectId: 'color-pie-review-20904',
 };
 
-const col = collection(getFirestore(initializeApp(firebaseConfig)), 'feedback');
+// Doc shape: effectId + the 4 free-text fields (colorTiers, cardExamples,
+// scopeDuplicate, otherMetadata; ≥1 filled) + optional reviewerName + createdAt.
+// status ('accepted'|'rejected', absent = pending) and reply are owner-set via admin.html.
+// Exported so admin.html can reuse the initialized default app + collection.
+export const col = collection(getFirestore(initializeApp(firebaseConfig)), 'feedback');
 
 export function addFeedback(effectId, payload) {
   return addDoc(col, { ...payload, effectId, createdAt: serverTimestamp() });

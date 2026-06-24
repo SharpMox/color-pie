@@ -6,118 +6,130 @@
 <title>Review Effect — Color Pie</title>
 <link rel="stylesheet" href="assets/site.css"/>
 <style>
-.wrap { max-width: 760px; margin: 0 auto; padding: 14px 16px 60px; }
-.navrow { display: flex; gap: 8px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
-.navrow a, .navrow button { min-height: 38px; padding: 0 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--text); font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; }
-.navrow a[aria-disabled="true"] { opacity: .4; pointer-events: none; }
-.navrow .spacer { flex: 1; }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 14px 0 210px; }  /* bottom pad clears the sticky form footer */
+.site-header-inner { flex-wrap: wrap; max-width: 1180px; padding-left: 0; padding-right: 0; }
+.site-title a { color: inherit; text-decoration: none; }
+.site-title a:hover { color: var(--accent); }
+.hdr-btn { min-height: 34px; padding: 0 12px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface-2); color: var(--text); font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; }
+.hdr-btn:hover { border-color: var(--accent); }
+.hdr-btn[aria-disabled="true"] { opacity: .4; pointer-events: none; }
+.hdr-btn.fb-toggle { border-color: var(--accent); color: var(--accent); margin-left: auto; }
+.theme-toggle { margin-left: 0; }  /* sit right after the Feedback button, not pushed apart */
 h2.eff-title { margin: 0 0 4px; font-size: 20px; }
-.eff-sub { color: var(--text-soft); font-size: 13px; margin: 0 0 14px; }
-.rationale { margin: 0 0 14px; }
-.detail-meta { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 16px; }
-.tag { font-size: 11px; color: var(--text-soft); border: 1px solid var(--border); border-radius: 6px; padding: 1px 6px; }
-.badge { font-size: 12px; font-weight: 700; border-radius: 999px; min-width: 24px; height: 24px; padding: 0 6px; background: var(--col); color: var(--col-ink); display: inline-flex; align-items: center; justify-content: center; }
+.eff-sub { color: var(--text-soft); font-size: 16px; margin: 0 0 10px; }
+.rationale { margin: 0 0 12px; }
+.detail-meta { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 16px; }
+.tag { font-size: 16px; color: var(--text-soft); border: 1px solid var(--border); border-radius: 6px; padding: 1px 6px; }
+.detail-meta .tag { font-size: 16px; padding: 8px 14px; border-radius: 10px; color: var(--text); }
+.badge { font-size: 16px; font-weight: 700; border-radius: 999px; min-width: 22px; height: 22px; padding: 0 6px; background: var(--col); color: var(--col-ink); display: inline-flex; align-items: center; justify-content: center; }
 .badge.W{--col:var(--c-W);--col-ink:var(--c-W-ink)} .badge.U{--col:var(--c-U);--col-ink:var(--c-U-ink)}
 .badge.B{--col:var(--c-B);--col-ink:var(--c-B-ink)} .badge.R{--col:var(--c-R);--col-ink:var(--c-R-ink)}
 .badge.G{--col:var(--c-G);--col-ink:var(--c-G-ink)} .badge.C{--col:var(--c-C);--col-ink:var(--c-C-ink)}
-.color-sec { margin: 0 0 18px; }
-.color-sec h3 { font-size: 14px; margin: 0 0 8px; display: flex; align-items: center; gap: 8px; }
-.tierlab { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+
+/* Colors on a single horizontal row (scrolls on mobile) */
+.colors-row { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; margin: 0 0 6px; }
+.color-sec { flex: 0 0 auto; width: 168px; margin: 0; border: 1px solid var(--border); border-radius: 10px; padding: 8px; background: var(--surface); }
+.color-sec h3 { font-size: 14px; margin: 0 0 8px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.tierlab { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 999px; }
 .tier-primary { background: var(--tier-primary); color: #06210f; }
 .tier-secondary { background: var(--tier-secondary); color: #2a1402; }
 .tier-tertiary { background: var(--tier-tertiary); color: #14171c; }
 .tier-off { background: transparent; color: var(--text-soft); border: 1px dashed var(--border); }
-.art-strip { display: flex; flex-wrap: wrap; gap: 12px; }
-fieldset.art { border: 1px solid var(--border); border-radius: 10px; margin: 0; padding: 8px; width: auto; text-align: center; }
-fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--text-soft); }
-.art img { width: 220px; max-width: 100%; border-radius: 9px; display: block; background: var(--surface-2); aspect-ratio: 488/680; object-fit: cover; }
-.art .cname { font-size: 12px; margin: 6px 0 0; }
-.no-art { color: var(--text-soft); font-size: 13px; }
-hr.sep { border: 0; border-top: 1px solid var(--border); margin: 22px 0; }
+.art-strip { display: flex; flex-direction: column; gap: 8px; }
+fieldset.art { border: 1px solid var(--border); border-radius: 8px; margin: 0; padding: 6px; width: auto; text-align: center; }
+fieldset.art > legend { margin: 0 auto; padding: 0 6px; font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-soft); }
+.art img { width: 140px; max-width: 100%; border-radius: 7px; display: block; background: var(--surface-2); aspect-ratio: 488/680; object-fit: cover; }
+.art .cname { font-size: 16px; margin: 4px 0 0; }
+.no-art { color: var(--text-soft); font-size: 16px; }
+hr.sep { border: 0; border-top: 1px solid var(--border); margin: 18px 0; }
 
-/* ===== Feedback form ===== */
-.fb-form { display: flex; flex-direction: column; gap: 14px; }
-.fb-form h2 { margin: 0; font-size: 16px; }
-.field { display: flex; flex-direction: column; gap: 6px; }
-.field > label, .field > .lab { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--text-soft); }
-.field select, .field input, .field textarea { font-size: 15px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--text); padding: 10px 12px; }
+/* ===== Feedback form: tall sticky footer, everything on one row (above drawer backdrop, z 70 > 55) ===== */
+.fb-footer { position: fixed; left: 0; right: 0; bottom: 0; z-index: 70; background: var(--surface); border-top: 1px solid var(--border); box-shadow: 0 -2px 12px rgba(0,0,0,.18); }
+.fb-form { padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+.field { display: flex; flex-direction: column; gap: 4px; flex: 1 1 0; min-width: 0; }
+.field.name-field { flex: 0 0 170px; align-self: flex-start; }
+.name-field .btn-primary { align-self: stretch; margin-top: 6px; }
+.field > label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--text-soft); }
+.field input, .field textarea { font-size: 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--text); padding: 8px 10px; }
 .field textarea { min-height: 120px; resize: vertical; }
-.color-toggles { display: flex; flex-wrap: wrap; gap: 8px; }
-.color-toggles label { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; border: 1px solid var(--border); border-radius: 10px; padding: 6px 10px; }
-.btn-primary { align-self: flex-start; min-height: 44px; padding: 0 20px; border: 0; border-radius: 12px; background: var(--accent); color: var(--accent-ink); font-size: 15px; font-weight: 700; cursor: pointer; }
+.btn-primary { flex: 0 0 auto; align-self: flex-start; min-height: 44px; padding: 0 22px; border: 0; border-radius: 10px; background: var(--accent); color: var(--accent-ink); font-size: 14px; font-weight: 700; cursor: pointer; }
 .btn-primary:disabled { opacity: .5; cursor: default; }
-.fb-msg { font-size: 13px; color: var(--text-soft); }
+.fb-msg { position: absolute; top: 8px; right: 16px; margin: 0; font-size: 12px; color: var(--text-soft); background: var(--surface); padding: 2px 8px; border-radius: 6px; }
+@media (max-width: 860px) { .fb-footer { max-height: 74vh; overflow-y: auto; } .field, .field.name-field { flex: 1 1 45%; } }
 
-/* ===== Existing feedback ===== */
-.fb-list { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+/* ===== Feedback drawer ===== */
+.drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(440px, 92vw); background: var(--surface); border-left: 1px solid var(--border); box-shadow: var(--shadow); transform: translateX(100%); transition: transform .2s ease; z-index: 60; display: flex; flex-direction: column; }
+.drawer.open { transform: translateX(0); }
+.drawer-bg { position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 55; }
+.drawer-head { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+.drawer-head h2 { margin: 0; font-size: 16px; }
+.drawer-close { margin-left: auto; width: 36px; height: 36px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface-2); color: var(--text); font-size: 18px; cursor: pointer; }
+.drawer-body { padding: 14px 16px 20px; overflow-y: auto; }
+.fb-list { display: flex; flex-direction: column; gap: 10px; }
+.fb-group { font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--text-soft); margin: 6px 0 0; }
+.fb-group.muted { opacity: .6; }
 .fb-item { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); padding: 12px 14px; }
-.fb-item .meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 12px; color: var(--text-soft); margin-bottom: 6px; }
+.fb-item .meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 12px; color: var(--text-soft); margin-bottom: 8px; }
 .fb-item .who { font-weight: 700; color: var(--text); }
-.fb-item .verdict { font-weight: 700; padding: 1px 8px; border-radius: 999px; background: var(--surface-2); }
-.fb-item .note { margin: 0; white-space: pre-wrap; }
+.st { font-weight: 700; padding: 1px 8px; border-radius: 999px; font-size: 11px; }
+.st-accepted { background: var(--tier-primary); color: #06210f; }
+.st-pending { background: var(--surface-2); color: var(--text-soft); }
+.st-rejected { background: transparent; color: var(--text-soft); border: 1px dashed var(--border); }
+.fb-field { margin: 0 0 6px; font-size: 13px; white-space: pre-wrap; }
+.fb-field b { color: var(--text-soft); font-weight: 600; }
+.reply { margin: 8px 0 0; padding: 8px 10px; border-left: 3px solid var(--accent); background: var(--surface-2); border-radius: 0 8px 8px 0; font-size: 13px; white-space: pre-wrap; }
 </style>
 </head>
 <body>
 <header class="site-header">
   <div class="site-header-inner">
-    <h1 class="site-title">Color Pie <small>· Review</small></h1>
+    <h1 class="site-title"><a href="index.html" title="Back to all effects">Color Pie <small>· Review</small></a></h1>
+    <a id="prev" class="hdr-btn" href="#">← Prev</a>
+    <a id="next" class="hdr-btn" href="#">Next →</a>
+    <button class="hdr-btn fb-toggle" id="fb-toggle" type="button">Feedback (<span id="fb-n">0</span>)</button>
     <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode" aria-pressed="false">◐</button>
   </div>
 </header>
 
 <main class="wrap">
-  <div class="navrow">
-    <a id="prev" href="#">← Prev</a>
-    <a id="next" href="#">Next →</a>
-    <span class="spacer"></span>
-    <a href="index.html">All effects</a>
-  </div>
   <div id="effect"></div>
+</main>
 
-  <hr class="sep"/>
+<footer class="fb-footer" id="fb-footer">
   <form class="fb-form" id="fb-form">
-    <h2>Leave feedback</h2>
     <div class="field">
-      <label for="verdict">Verdict on placement</label>
-      <select id="verdict" required>
-        <option value="">— choose —</option>
-        <option value="correct">Correctly placed</option>
-        <option value="wrong_color">Wrong color</option>
-        <option value="wrong_strength">Wrong strength</option>
-        <option value="borderline">Borderline</option>
-      </select>
+      <label for="colorTiers">Color tiers</label>
+      <textarea id="colorTiers" maxlength="1000" placeholder="Wrong color? Wrong tier?"></textarea>
     </div>
     <div class="field">
-      <span class="lab">Suggested color(s)</span>
-      <div class="color-toggles" id="colors"></div>
+      <label for="cardExamples">Card examples</label>
+      <textarea id="cardExamples" maxlength="1000" placeholder="Better on-rate / cheapest / iconic?"></textarea>
     </div>
     <div class="field">
-      <label for="strength">Suggested strength</label>
-      <select id="strength">
-        <option value="">—</option>
-        <option value="primary">Primary</option>
-        <option value="secondary">Secondary</option>
-        <option value="tertiary">Tertiary</option>
-        <option value="bend">Bend</option>
-        <option value="break">Break</option>
-      </select>
+      <label for="scopeDuplicate">Too broad / duplicate / collides</label>
+      <textarea id="scopeDuplicate" maxlength="1000" placeholder="Split, merge, or overlaps another effect?"></textarea>
     </div>
     <div class="field">
-      <label for="note">Note</label>
-      <textarea id="note" maxlength="1000" placeholder="Why? Anything you'd change…"></textarea>
+      <label for="otherMetadata">Other wrong metadata</label>
+      <textarea id="otherMetadata" maxlength="1000" placeholder="Type, category, interaction, duration…"></textarea>
     </div>
-    <div class="field">
-      <label for="name">Your name (optional)</label>
-      <input id="name" type="text" maxlength="80" placeholder="Anonymous"/>
+    <div class="field name-field">
+      <label for="name">Your name</label>
+      <input id="name" type="text" maxlength="80" placeholder="Optional" aria-label="Your name"/>
+      <button class="btn-primary" type="submit" id="submit" disabled>Submit</button>
     </div>
-    <button class="btn-primary" type="submit" id="submit">Submit feedback</button>
     <p class="fb-msg" id="fb-msg"></p>
   </form>
+</footer>
 
-  <hr class="sep"/>
-  <h2 style="font-size:16px;margin:0 0 4px">Feedback <span id="fb-count" class="tag"></span></h2>
-  <div class="fb-list" id="fb-list"></div>
-</main>
+<div class="drawer-bg" id="drawer-bg" hidden></div>
+<aside class="drawer" id="drawer" aria-label="Submitted feedback">
+  <div class="drawer-head">
+    <h2>Feedback</h2>
+    <button class="drawer-close" id="drawer-close" aria-label="Close">×</button>
+  </div>
+  <div class="drawer-body"><div class="fb-list" id="fb-list"></div></div>
+</aside>
 
 <script src="data/colorpie.js"></script>
 <script src="assets/theme.js"></script>
@@ -127,21 +139,26 @@ import { addFeedback, listFeedback } from './assets/feedback.js';
 var COLORS = [['W','White'],['U','Blue'],['B','Black'],['R','Red'],['G','Green'],['C','Colorless']];
 var TIERWORD = { primary:'Primary', secondary:'Secondary', tertiary:'Tertiary' };
 var ARCH = { onRate:'On-rate', cheapest:'Cheapest', iconic:'Iconic', bendBreak:'Bend/Break' };
-var VERDICT = { correct:'Correctly placed', wrong_color:'Wrong color', wrong_strength:'Wrong strength', borderline:'Borderline' };
+var FIELD_IDS = ['colorTiers','cardExamples','scopeDuplicate','otherMetadata'];
+var FIELD_LABEL = { colorTiers:'Color tiers', cardExamples:'Card examples', scopeDuplicate:'Scope / duplicates', otherMetadata:'Other metadata' };
+var STATUS_ORDER = { accepted:0, pending:1, rejected:2 };
+var STATUS_LABEL = { accepted:'Accepted', pending:'To review', rejected:'Rejected' };
 function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
 function cardImg(name){ var v = CARDS[name]; if(!v) return ''; return /^https?:/.test(v) ? v : 'https://cards.scryfall.io/normal/front/'+v[0]+'/'+v[1]+'/'+v+'.jpg'; }
 
-var id = new URLSearchParams(location.search).get('id');
-var i = COLORPIE.findIndex(function(e){ return String(e.id) === String(id); });
-if (i === -1) {
-  document.getElementById('effect').innerHTML = '<p class="no-art">Effect not found. <a href="index.html">Back to all effects</a></p>';
-  document.getElementById('fb-form').hidden = true;
-} else {
-  renderEffect(COLORPIE[i]);
-  wirePrevNext(i);
-  wireForm(COLORPIE[i]);
-  refreshList(COLORPIE[i]);
-}
+// ----- drawer -----
+var drawer = document.getElementById('drawer'), drawerBg = document.getElementById('drawer-bg');
+var footerEl = document.getElementById('fb-footer');
+// drawer bottom = top of the sticky footer, so its content is never hidden behind it
+function syncDrawerBottom(){ drawer.style.bottom = (footerEl && !footerEl.hidden ? footerEl.offsetHeight : 0) + 'px'; }
+if (window.ResizeObserver) new ResizeObserver(syncDrawerBottom).observe(footerEl);
+window.addEventListener('resize', syncDrawerBottom);
+syncDrawerBottom();
+function openDrawer(){ syncDrawerBottom(); drawer.classList.add('open'); drawerBg.hidden = false; }
+function closeDrawer(){ drawer.classList.remove('open'); drawerBg.hidden = true; }
+document.getElementById('fb-toggle').addEventListener('click', openDrawer);
+document.getElementById('drawer-close').addEventListener('click', closeDrawer);
+drawerBg.addEventListener('click', closeDrawer);
 
 function renderEffect(eff){
   document.title = 'Review: ' + eff.title + ' — Color Pie';
@@ -169,11 +186,8 @@ function renderEffect(eff){
     '<h2 class="eff-title">'+esc(eff.title)+'</h2>'+
     '<p class="eff-sub">'+esc(eff.type)+(eff.category?' · '+esc(eff.category):'')+'</p>'+
     '<p class="rationale">'+esc(eff.rationale||'')+'</p>'+
-    (meta?'<div class="detail-meta">'+meta+'</div>':'')+secs;
-  // color toggles
-  document.getElementById('colors').innerHTML = COLORS.map(function(c){
-    return '<label><input type="checkbox" value="'+c[0]+'"/> '+c[1]+'</label>';
-  }).join('');
+    (meta?'<div class="detail-meta">'+meta+'</div>':'')+
+    '<div class="colors-row">'+secs+'</div>';
 }
 
 function wirePrevNext(i){
@@ -186,47 +200,78 @@ function wirePrevNext(i){
 
 function wireForm(eff){
   var form = document.getElementById('fb-form'), msg = document.getElementById('fb-msg'), btn = document.getElementById('submit');
+  var nameEl = document.getElementById('name');
+  nameEl.value = localStorage.getItem('cp-reviewer-name') || '';   // remember name across submits/visits
+  function filled(){ return FIELD_IDS.some(function(id){ return document.getElementById(id).value.trim(); }); }
+  function sync(){ btn.disabled = !filled(); }
+  FIELD_IDS.forEach(function(id){ document.getElementById(id).addEventListener('input', sync); });
+  sync();
   form.addEventListener('submit', async function(e){
     e.preventDefault();
-    var verdict = document.getElementById('verdict').value;
-    if (!verdict) { msg.textContent = 'Pick a verdict first.'; return; }
-    var payload = { verdict: verdict };
-    var colors = [].map.call(document.querySelectorAll('#colors input:checked'), function(c){return c.value;});
-    if (colors.length) payload.suggestedColors = colors;
-    var strength = document.getElementById('strength').value; if (strength) payload.suggestedStrength = strength;
-    var note = document.getElementById('note').value.trim(); if (note) payload.note = note.slice(0,1000);
-    var name = document.getElementById('name').value.trim(); if (name) payload.reviewerName = name.slice(0,80);
+    if (!filled()) { msg.textContent = 'Fill at least one field.'; return; }
+    var payload = {};
+    FIELD_IDS.forEach(function(id){ var v = document.getElementById(id).value.trim(); if (v) payload[id] = v.slice(0,1000); });
+    var name = nameEl.value.trim();
+    if (name) { payload.reviewerName = name.slice(0,80); localStorage.setItem('cp-reviewer-name', payload.reviewerName); }
     btn.disabled = true; msg.textContent = 'Saving…';
     try {
       await addFeedback(String(eff.id), payload);
-      form.reset();
+      form.reset(); nameEl.value = localStorage.getItem('cp-reviewer-name') || ''; sync();
       msg.textContent = 'Thanks — feedback saved.';
       await refreshList(eff);
+      openDrawer();
     } catch (err) {
       msg.textContent = 'Could not save: ' + (err && err.message ? err.message : err);
-    } finally { btn.disabled = false; }
+      btn.disabled = false;
+    }
   });
 }
 
+function itemHTML(r){
+  var when = r.createdAt && r.createdAt.toDate ? r.createdAt.toDate().toLocaleDateString() : '';
+  var st = r.status || 'pending';
+  var fields = FIELD_IDS.filter(function(f){ return r[f]; }).map(function(f){
+    return '<p class="fb-field"><b>'+FIELD_LABEL[f]+':</b> '+esc(r[f])+'</p>';
+  }).join('');
+  return '<div class="fb-item"><div class="meta">'+
+    '<span class="who">'+esc(r.reviewerName||'Anonymous')+'</span>'+
+    '<span class="st st-'+st+'">'+STATUS_LABEL[st]+'</span>'+
+    (when?'<span>'+esc(when)+'</span>':'')+
+    '</div>'+fields+
+    (r.reply?'<p class="reply"><b>Reply:</b> '+esc(r.reply)+'</p>':'')+
+  '</div>';
+}
+
 async function refreshList(eff){
-  var list = document.getElementById('fb-list'), count = document.getElementById('fb-count');
+  var list = document.getElementById('fb-list'), nEl = document.getElementById('fb-n');
   var rows;
   try { rows = await listFeedback(String(eff.id)); }
   catch (err) { list.innerHTML = '<p class="no-art">Could not load feedback: '+esc(err.message||String(err))+'</p>'; return; }
-  count.textContent = rows.length;
+  nEl.textContent = rows.length;
   if (!rows.length) { list.innerHTML = '<p class="no-art">No feedback yet — be the first.</p>'; return; }
-  list.innerHTML = rows.map(function(r){
-    var when = r.createdAt && r.createdAt.toDate ? r.createdAt.toDate().toLocaleDateString() : '';
-    var extra = [];
-    if (r.suggestedColors && r.suggestedColors.length) extra.push('→ ' + r.suggestedColors.join(''));
-    if (r.suggestedStrength) extra.push(r.suggestedStrength);
-    return '<div class="fb-item"><div class="meta">'+
-      '<span class="who">'+esc(r.reviewerName||'Anonymous')+'</span>'+
-      '<span class="verdict">'+esc(VERDICT[r.verdict]||r.verdict)+'</span>'+
-      (extra.length?'<span>'+esc(extra.join(' · '))+'</span>':'')+
-      (when?'<span>'+esc(when)+'</span>':'')+
-      '</div>'+(r.note?'<p class="note">'+esc(r.note)+'</p>':'')+'</div>';
-  }).join('');
+  // listFeedback is date-desc; stable sort by status group keeps newest-first within each group
+  rows.sort(function(a,b){ return (STATUS_ORDER[a.status||'pending']) - (STATUS_ORDER[b.status||'pending']); });
+  var lastGroup = null, html = '';
+  rows.forEach(function(r){
+    var st = r.status || 'pending';
+    if (st !== lastGroup) { html += '<div class="fb-group'+(st==='rejected'?' muted':'')+'">'+STATUS_LABEL[st]+'</div>'; lastGroup = st; }
+    html += itemHTML(r);
+  });
+  list.innerHTML = html;
+}
+
+// ----- init -----
+var id = new URLSearchParams(location.search).get('id');
+var i = COLORPIE.findIndex(function(e){ return String(e.id) === String(id); });
+if (i === -1) {
+  document.getElementById('effect').innerHTML = '<p class="no-art">Effect not found. <a href="index.html">Back to all effects</a></p>';
+  document.getElementById('fb-footer').hidden = true;
+  document.getElementById('fb-toggle').hidden = true;
+} else {
+  renderEffect(COLORPIE[i]);
+  wirePrevNext(i);
+  wireForm(COLORPIE[i]);
+  refreshList(COLORPIE[i]);
 }
 </script>
 </body>
