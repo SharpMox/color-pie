@@ -245,7 +245,10 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
     if (e.isVariant) byBase[e.base].variants.push(e); else byBase[e.base].baseEffect = e;
   });
   var GROUPS = order.map(function (b) { return byBase[b]; });
-  GROUPS.forEach(function (g) { if (!g.baseEffect) g.baseEffect = g.variants.shift(); }); // ponytail: orphan variant becomes anchor
+  // most groups have NO standalone base row (e.g. "Flying" exists only as its
+  // variants); promote the first variant as the group's anchor. `base` is a
+  // grouping label (the Ranking relation), not necessarily a real effect row.
+  GROUPS.forEach(function (g) { if (!g.baseEffect) g.baseEffect = g.variants.shift(); });
 
   // ----- Helpers -----
   function haystack(e) {
@@ -273,7 +276,7 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
   }
   // Color filter (never sorts): no filter when all/none selected; else keep effects whose
   // pie includes a selected color (at the chosen tier, or any tier when tier === 'all').
-  function passesTier(g) {
+  function passesColor(g) {
     if (!selected.size) return false;                  // no colors → dim all, prompt to pick
     if (selected.size === COLORS.length) return true;
     var rank = g.baseEffect.rank;
@@ -333,8 +336,8 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
     GROUPS.forEach(function (g) {   // natural data order; color picker filters, never sorts
       var members = [g.baseEffect].concat(g.variants);
       var isGroup = members.length > 1;
-      var tierOk = passesTier(g);
-      var res = tierOk ? members.filter(passesRow) : [];
+      var colorOk = passesColor(g);
+      var res = colorOk ? members.filter(passesRow) : [];
       var out = members.filter(function (m) { return res.indexOf(m) === -1; });
       if (res.length) { resHtml += groupWrap(g, isGroup, res, filtering); shown += res.length; }
       if (out.length) { outHtml += groupWrap(g, isGroup, out, false); dimmed += out.length; }
@@ -484,10 +487,10 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
   (function selftest() {
     var save = selected;                  // restore after — don't desync the rendered picker
     selected = new Set(['U']);            // strict subset → color filter active
-    console.assert(passesTier({ baseEffect: { rank: { U: 'primary' } } }), 'in-pie passes color filter');
-    console.assert(!passesTier({ baseEffect: { rank: { U: null } } }), 'off-pie filtered out');
+    console.assert(passesColor({ baseEffect: { rank: { U: 'primary' } } }), 'in-pie passes color filter');
+    console.assert(!passesColor({ baseEffect: { rank: { U: null } } }), 'off-pie filtered out');
     selected = new Set();
-    console.assert(!passesTier({ baseEffect: { rank: {} } }), 'no colors dims all');
+    console.assert(!passesColor({ baseEffect: { rank: {} } }), 'no colors dims all');
     selected = save;
   })();
 })();
