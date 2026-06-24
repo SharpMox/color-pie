@@ -128,6 +128,8 @@ dialog.detail::backdrop { background: rgba(0,0,0,.5); }
 .art-strip { display: flex; flex-wrap: wrap; gap: 12px; }
 fieldset.art { border: 1px solid var(--border); border-radius: 10px; margin: 0; padding: 8px; width: auto; text-align: center; }
 fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--text-soft); }
+fieldset.art.bendbreak { border-color: var(--c-R); }
+fieldset.art.bendbreak > legend { color: var(--c-R); }
 .art img { width: 300px; max-width: 100%; border-radius: 9px; display: block; background: var(--surface-2); aspect-ratio: 488/680; object-fit: cover; }
 .art .cname { font-size: 12px; margin: 6px 0 0; }
 .no-art { color: var(--text-soft); font-size: 13px; }
@@ -379,7 +381,7 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
       var cell = eff.cards[c.k] || {};
       var arts = picks.filter(function (p) { return cell[p]; }).map(function (p) {
         var name = cell[p], img = cardImg(name);
-        return '<fieldset class="art"><legend>' + ARCH[p] + '</legend>' +
+        return '<fieldset class="art' + (p === 'bendBreak' ? ' bendbreak' : '') + '"><legend>' + ARCH[p] + '</legend>' +
           (img ? '<img loading="lazy" src="' + esc(img) + '" alt="' + esc(name) + '"/>' : '') +
           '<p class="cname">' + esc(name) + '</p></fieldset>';
       }).join('');

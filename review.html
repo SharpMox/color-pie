@@ -6,8 +6,8 @@
 <title>Review Effect — Color Pie</title>
 <link rel="stylesheet" href="assets/site.css"/>
 <style>
-.wrap { max-width: 1180px; margin: 0 auto; padding: 14px 0 210px; }  /* bottom pad clears the sticky form footer */
-.site-header-inner { flex-wrap: wrap; max-width: 1180px; padding-left: 0; padding-right: 0; }
+.wrap { max-width: 1400px; margin: 0 auto; padding: 14px 0 210px; }  /* wide enough for all 6 color columns; bottom pad clears the sticky form footer */
+.site-header-inner { flex-wrap: wrap; max-width: 1400px; padding-left: 0; padding-right: 0; }
 .site-title a { color: inherit; text-decoration: none; }
 .site-title a:hover { color: var(--accent); }
 .hdr-btn { min-height: 34px; padding: 0 12px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface-2); color: var(--text); font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; }
@@ -28,7 +28,7 @@ h2.eff-title { margin: 0 0 4px; font-size: 20px; }
 
 /* Colors on a single horizontal row (scrolls on mobile) */
 .colors-row { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; margin: 0 0 6px; }
-.color-sec { flex: 0 0 auto; width: 168px; margin: 0; border: 1px solid var(--border); border-radius: 10px; padding: 8px; background: var(--surface); }
+.color-sec { flex: 0 0 auto; width: 218px; margin: 0; border: 1px solid var(--border); border-radius: 10px; padding: 8px; background: var(--surface); }
 .color-sec h3 { font-size: 14px; margin: 0 0 8px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .tierlab { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 999px; }
 .tier-primary { background: var(--tier-primary); color: #06210f; }
@@ -38,7 +38,9 @@ h2.eff-title { margin: 0 0 4px; font-size: 20px; }
 .art-strip { display: flex; flex-direction: column; gap: 8px; }
 fieldset.art { border: 1px solid var(--border); border-radius: 8px; margin: 0; padding: 6px; width: auto; text-align: center; }
 fieldset.art > legend { margin: 0 auto; padding: 0 6px; font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-soft); }
-.art img { width: 140px; max-width: 100%; border-radius: 7px; display: block; background: var(--surface-2); aspect-ratio: 488/680; object-fit: cover; }
+fieldset.art.bendbreak { border-color: var(--c-R); }
+fieldset.art.bendbreak > legend { color: var(--c-R); }
+.art img { width: 182px; max-width: 100%; border-radius: 7px; display: block; background: var(--surface-2); aspect-ratio: 488/680; object-fit: cover; }
 .art .cname { font-size: 16px; margin: 4px 0 0; }
 .no-art { color: var(--text-soft); font-size: 16px; }
 hr.sep { border: 0; border-top: 1px solid var(--border); margin: 18px 0; }
@@ -173,7 +175,7 @@ function renderEffect(eff){
     var cell = eff.cards[c[0]] || {};
     var arts = picks.filter(function(p){return cell[p];}).map(function(p){
       var name = cell[p], img = cardImg(name);
-      return '<fieldset class="art"><legend>'+ARCH[p]+'</legend>'+
+      return '<fieldset class="art'+(p==='bendBreak'?' bendbreak':'')+'"><legend>'+ARCH[p]+'</legend>'+
         (img?'<img loading="lazy" src="'+esc(img)+'" alt="'+esc(name)+'"/>':'')+
         '<p class="cname">'+esc(name)+'</p></fieldset>';
     }).join('');
