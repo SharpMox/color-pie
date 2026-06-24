@@ -88,6 +88,8 @@ const effects = read('Effects.csv')
     if (Object.keys(c).length) cards[k] = c;
   });
   return {
+    // isVariant is true for every row in a keyword group (base = the Ranking
+    // relation, which rarely matches a row's own title), so most rows are variants.
     title, base, isVariant: base !== title,
     type: r['Type'] || '',
     category: relNames(r['Category'])[0] || '',
