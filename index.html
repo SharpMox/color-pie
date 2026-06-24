@@ -326,7 +326,10 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
   function render() {
     var resHtml = '', outHtml = '', shown = 0, dimmed = 0;
     // groups collapse by default; any active filter/search auto-opens matching groups
-    var filtering = !!query;   // only the search box auto-expands groups
+    // any row-level filter can match a subset of a group's variants; auto-open so
+    // matches aren't hidden inside a collapsed <details> (tier/colour are group-level)
+    var filtering = !!query || !!filt.type || !!filt.category ||
+      !!filt.interaction.size || !!filt.duration.size || !!filt.baseKeyword.size;
     GROUPS.forEach(function (g) {   // natural data order; color picker filters, never sorts
       var members = [g.baseEffect].concat(g.variants);
       var isGroup = members.length > 1;
