@@ -41,7 +41,7 @@
   min-height: 38px; padding: 0 12px; border: 1px solid var(--border); border-radius: 999px;
   background: var(--surface); color: var(--text-soft); font-size: 13px; font-weight: 600; cursor: pointer;
 }
-.seg button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+.seg button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 select.mini { min-height: 38px; padding: 0 10px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--text); font-size: 13px; font-weight: 600; cursor: pointer; }
 details.more { border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
 details.more > summary { min-height: 38px; padding: 0 12px; display: flex; align-items: center; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text-soft); list-style: none; }
@@ -51,7 +51,7 @@ details.more[open] { flex-basis: 100%; padding: 0 12px 12px; }
 details.more .sub { font-size: 11px; font-weight: 700; color: var(--text-soft); text-transform: uppercase; margin: 10px 0 4px; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip { min-height: 34px; padding: 0 12px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--text-soft); font-size: 13px; font-weight: 600; cursor: pointer; }
-.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 
 .count { font-size: 13px; color: var(--text-soft); margin: 4px 0 6px; }
 
@@ -84,7 +84,8 @@ details.group[open] > summary .row-name::before { transform: rotate(90deg); }
 /* expanded: the <details> becomes a frame wrapping the rows; header drops its P/S/T + chrome */
 details.group[open] { border: 1px solid var(--border); border-radius: 12px; padding: 6px; }
 details.group[open] > summary { border: 0; background: transparent; }
-details.group[open] > summary .tier-cell { display: none; }
+details.group[open] > summary .tier-cell,
+details.group[open] > summary .row-tags { display: none; }
 details.group[open] > .row { margin-top: 6px; }
 .row {
   width: 100%; text-align: left; cursor: pointer;
@@ -127,7 +128,7 @@ dialog.detail::backdrop { background: rgba(0,0,0,.5); }
 .art-strip { display: flex; flex-wrap: wrap; gap: 12px; }
 fieldset.art { border: 1px solid var(--border); border-radius: 10px; margin: 0; padding: 8px; width: auto; text-align: center; }
 fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--text-soft); }
-.art img { width: 150px; border-radius: 9px; display: block; background: var(--surface-2); aspect-ratio: 488/680; object-fit: cover; }
+.art img { width: 300px; max-width: 100%; border-radius: 9px; display: block; background: var(--surface-2); aspect-ratio: 488/680; object-fit: cover; }
 .art .cname { font-size: 12px; margin: 6px 0 0; }
 .no-art { color: var(--text-soft); font-size: 13px; }
 
@@ -172,8 +173,8 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
         <div class="seg" id="tier">
           <button data-tier="all" aria-pressed="true">All</button>
           <button data-tier="primary" aria-pressed="false">Primary</button>
-          <button data-tier="secondary" aria-pressed="false">+ Secondary</button>
-          <button data-tier="tertiary" aria-pressed="false">In-pie</button>
+          <button data-tier="secondary" aria-pressed="false">Secondary</button>
+          <button data-tier="tertiary" aria-pressed="false">Tertiary</button>
           <button data-tier="offpie" aria-pressed="false">Off-pie</button>
         </div>
       </div>
@@ -257,6 +258,13 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
   function inPieCount(eff) {
     var n = 0; selected.forEach(function (k) { if (eff.rank[k]) n++; }); return n;
   }
+  // true when the effect's colours at the active tier are EXACTLY the selected set
+  function exactCombo(eff) {
+    var n = 0;
+    for (var k of selected) { if (eff.rank[k] !== tier) return false; n++; }  // all selected at tier
+    var total = 0; COLORS.forEach(function (c) { if (eff.rank[c.k] === tier) total++; });
+    return total === n;                                                       // and no extra colour at tier
+  }
   function haystack(e) {
     var s = e.title + ' ' + (e.rationale || '') + ' ' + (e.category || '');
     Object.keys(e.cards || {}).forEach(function (k) {
@@ -281,18 +289,24 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
     return true;
   }
   function passesTier(g) {
+    // group-level filter over selected colours (variants share baseEffect.rank)
     if (!selected.size || tier === 'all') return true;
-    var b = bestTier(g.baseEffect);
-    if (tier === 'primary')   return b === 3;
-    if (tier === 'secondary') return b >= 2;
-    if (tier === 'tertiary')  return b >= 1;   // any in-pie
-    if (tier === 'offpie')    return b === 0;
-    return true;
+    var rank = g.baseEffect.rank;
+    // off-pie = none of the selected colours are in this effect's pie
+    if (tier === 'offpie') { for (var k of selected) if (rank[k]) return false; return true; }
+    // primary/secondary/tertiary = at least one selected colour sits at that tier
+    for (var k of selected) if (rank[k] === tier) return true;
+    return false;
   }
 
   // ----- Sort groups: in-pie to top, else neutral (category, title) -----
   function sortGroups(gs) {
+    var exactSort = selected.size > 1 && tier !== 'all' && tier !== 'offpie';
     return gs.slice().sort(function (a, b) {
+      if (exactSort) {   // float exact selected-combo-at-tier matches to the very top
+        var ea = exactCombo(a.baseEffect), eb = exactCombo(b.baseEffect);
+        if (ea !== eb) return ea ? -1 : 1;
+      }
       if (selected.size) {
         var d = bestTier(b.baseEffect) - bestTier(a.baseEffect); if (d) return d;
         var c = inPieCount(b.baseEffect) - inPieCount(a.baseEffect); if (c) return c;
@@ -310,8 +324,7 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
   // selected colours appear in no cell.
   function tierCells(eff) {
     var buckets = { primary: [], secondary: [], tertiary: [] };
-    COLORS.forEach(function (c) {
-      if (!selected.has(c.k)) return;
+    COLORS.forEach(function (c) {   // always show every colour's tier, regardless of picker
       var t = eff.rank[c.k];
       if (t && buckets[t]) buckets[t].push(c);
     });
@@ -339,14 +352,17 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
   // as a bare row.
   function groupWrap(g, isGroup, rows, open) {
     var inner = rows.map(function (e) { return rowHTML(e, isGroup); }).join('');
+    var be = g.baseEffect;
     return isGroup ? '<details class="group"' + (open ? ' open' : '') + '><summary>' +
-      '<span class="cell-main"><span class="row-name">' + esc(g.base) + '</span></span>' +
-      tierCells(g.baseEffect) + '</summary>' + inner + '</details>' : inner;
+      '<span class="cell-main"><span class="row-name">' + esc(g.base) + '</span>' +
+      '<span class="row-tags"><span class="tag">' + esc(be.type) + '</span>' +
+      (be.category ? '<span class="tag">' + esc(be.category) + '</span>' : '') + '</span></span>' +
+      tierCells(be) + '</summary>' + inner + '</details>' : inner;
   }
   function render() {
     var resHtml = '', outHtml = '', shown = 0, dimmed = 0;
     // groups collapse by default; any active filter/search auto-opens matching groups
-    var filtering = !!query || !!filt.type || !!filt.category || filt.interaction.size || filt.duration.size || filt.baseKeyword.size || tier !== 'all';
+    var filtering = !!query;   // only the search box auto-expands groups
     sortGroups(GROUPS).forEach(function (g) {
       var members = [g.baseEffect].concat(g.variants);
       var isGroup = members.length > 1;
@@ -420,6 +436,17 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
     var k = b.dataset.k;
     if (selected.has(k)) selected.delete(k); else selected.add(k);
     b.setAttribute('aria-pressed', selected.has(k) ? 'true' : 'false');
+    document.getElementById('tier-note').hidden = selected.size > 0;
+    render();
+  });
+  // double-click a colour = solo it (deactivate all others)
+  pickerEl.addEventListener('dblclick', function (e) {
+    var b = e.target.closest('.pick'); if (!b) return;
+    var k = b.dataset.k;
+    selected = new Set([k]);
+    [].forEach.call(pickerEl.children, function (btn) {
+      btn.setAttribute('aria-pressed', btn.dataset.k === k ? 'true' : 'false');
+    });
     document.getElementById('tier-note').hidden = selected.size > 0;
     render();
   });

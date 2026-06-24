@@ -16,7 +16,7 @@
   --text-soft: #5b6573;
   --border: #d8dce3;
   --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.05);
-  --accent: #2659a8;
+  --accent: #2659a8; --accent-ink: #ffffff;
 
   /* MTG colour tokens (W/U/B/R/G/C) */
   --c-W: #f4e8c1; --c-W-ink: #5c4a16;
@@ -40,7 +40,7 @@
   --text-soft: #8fa0b8;
   --border: #2a3a55;
   --shadow: 0 1px 3px rgba(0,0,0,0.45), 0 8px 24px rgba(0,0,0,0.35);
-  --accent: #7ec6ff;
+  --accent: #7ec6ff; --accent-ink: #0c1119;
 
   --c-W: #d8caa0; --c-W-ink: #2a2310;
   --c-U: #3f87cf; --c-U-ink: #07101d;
