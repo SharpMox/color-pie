@@ -132,6 +132,12 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
 .art .cname { font-size: 12px; margin: 6px 0 0; }
 .no-art { color: var(--text-soft); font-size: 13px; }
 
+/* Review affordance (row pill + modal button) */
+.review { font-size: 11px; font-weight: 600; color: var(--accent); border: 1px solid var(--border); border-radius: 6px; padding: 1px 6px; cursor: pointer; }
+.review:hover { border-color: var(--accent); }
+.detail-review { margin-left: auto; min-height: 38px; padding: 0 14px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface-2); color: var(--text); font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; }
+.detail-review:hover { border-color: var(--accent); }
+
 /* ===== Mobile: stack rows (name on top, tags + labeled P/S/T columns below) ===== */
 @media (max-width: 560px) {
   .list-head { display: none; }                 /* tabular header doesn't map to stacked rows */
@@ -211,6 +217,7 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
       <h2 id="d-title"></h2>
       <span class="tag" id="d-type"></span>
     </div>
+    <a class="detail-review" id="d-review" href="#">✎ Review</a>
     <button class="detail-close" id="d-close" aria-label="Close">×</button>
   </div>
   <div class="detail-body" id="d-body"></div>
@@ -235,6 +242,7 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
   var selected = new Set(['W','U','B','R','G','C']);   // all colors on by default
   var tier = 'all';
   var query = '';
+  var fbCounts = {};   // effect id -> feedback count; filled async by the feedback module
   var filt = { type:'', category:'', interaction:new Set(), duration:new Set(), baseKeyword:new Set() };
 
   // ----- Build groups: effects sharing a `base` label, first-appearance order.
@@ -302,10 +310,13 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
     }).join('');
   }
   function rowHTML(e, grouped) {
+    var n = fbCounts[e.id] || 0;
     return '<button class="row' + (grouped ? ' grouped' : '') + '" data-eff="' + e._i + '">' +
       '<div class="cell-main"><span class="row-name">' + esc(e.title) + '</span>' +
       '<span class="row-tags"><span class="tag">' + esc(e.type) + '</span>' +
-      (e.category ? '<span class="tag">' + esc(e.category) + '</span>' : '') + '</span></div>' +
+      (e.category ? '<span class="tag">' + esc(e.category) + '</span>' : '') +
+      '<span class="review" data-id="' + esc(e.id) + '">✎ Review' + (n ? ' ' + n : '') + '</span>' +
+      '</span></div>' +
       tierCells(e) +
     '</button>';
   }
@@ -386,6 +397,10 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
     document.getElementById('d-title').textContent = eff.title;
     document.getElementById('d-type').textContent = eff.type + (eff.category ? ' · ' + eff.category : '');
     document.getElementById('d-body').innerHTML = detailHTML(eff);
+    var n = fbCounts[eff.id] || 0;
+    var rev = document.getElementById('d-review');
+    rev.href = 'review.html?id=' + encodeURIComponent(eff.id);
+    rev.textContent = '✎ Review' + (n ? ' (' + n + ')' : '');
     if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open','');
   }
   document.getElementById('d-close').addEventListener('click', function () { dlg.close(); });
@@ -466,11 +481,16 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
   buildChips('f-duration',    uniq(function (e) { return e.duration; }),    'duration');
   buildChips('f-baseKeyword', uniq(function (e) { return e.baseKeyword; }), 'baseKeyword');
 
-  // row click → detail (delegation)
+  // row click → detail (delegation); the Review pill navigates instead
   document.getElementById('list').addEventListener('click', function (e) {
+    var rev = e.target.closest('.review');
+    if (rev) { location.href = 'review.html?id=' + encodeURIComponent(rev.dataset.id); return; }
     var r = e.target.closest('.row'); if (!r) return;
     openDetail(+r.dataset.eff);
   });
+
+  // feedback counts populate badges asynchronously (see module script below)
+  window.applyFbCounts = function (counts) { fbCounts = counts || {}; render(); };
 
   // park the sticky column header just under the sticky site header
   var siteHeader = document.querySelector('.site-header');
@@ -492,6 +512,13 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
     selected = save;
   })();
 })();
+</script>
+<script type="module">
+// Fill the review-count badges once. Failure (e.g. Firebase not yet configured)
+// is non-fatal — the page works without counts.
+import { allCounts } from './assets/feedback.js';
+allCounts().then(function (c) { window.applyFbCounts(c); })
+  .catch(function (err) { console.warn('feedback counts unavailable:', err && err.message || err); });
 </script>
 </body>
 </html>

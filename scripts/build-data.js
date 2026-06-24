@@ -88,6 +88,7 @@ const effects = read('Effects.csv')
     if (Object.keys(c).length) cards[k] = c;
   });
   return {
+    id: r['Index'] || '',        // Notion unique-ID — stable key for review feedback
     title, base,                 // base = group label (Notion Ranking relation), not a real row
 
     type: r['Type'] || '',

@@ -1,0 +1,24 @@
+rules_version = '2';
+// Open comment wall for effect feedback: anyone may read, and create a single
+// validated document. No updates/deletes from clients — moderate from the
+// Firebase console. Paste into Firestore → Rules, or deploy with the CLI.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /feedback/{id} {
+      allow read: if true;
+      allow update, delete: if false;
+      allow create: if isValid(request.resource.data);
+    }
+  }
+}
+
+function isValid(d) {
+  return d.keys().hasOnly(['effectId','verdict','suggestedColors','suggestedStrength','note','reviewerName','createdAt'])
+    && d.effectId is string && d.effectId.size() > 0 && d.effectId.size() <= 40
+    && d.verdict in ['correct','wrong_color','wrong_strength','borderline']
+    && (!('suggestedColors' in d) || (d.suggestedColors is list && d.suggestedColors.size() <= 6))
+    && (!('suggestedStrength' in d) || d.suggestedStrength in ['primary','secondary','tertiary','bend','break'])
+    && (!('note' in d) || (d.note is string && d.note.size() <= 1000))
+    && (!('reviewerName' in d) || (d.reviewerName is string && d.reviewerName.size() <= 80))
+    && d.createdAt == request.time;
+}

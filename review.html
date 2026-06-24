@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Review Effect — Color Pie</title>
+<link rel="stylesheet" href="assets/site.css"/>
+<style>
+.wrap { max-width: 760px; margin: 0 auto; padding: 14px 16px 60px; }
+.navrow { display: flex; gap: 8px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+.navrow a, .navrow button { min-height: 38px; padding: 0 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--text); font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; }
+.navrow a[aria-disabled="true"] { opacity: .4; pointer-events: none; }
+.navrow .spacer { flex: 1; }
+h2.eff-title { margin: 0 0 4px; font-size: 20px; }
+.eff-sub { color: var(--text-soft); font-size: 13px; margin: 0 0 14px; }
+.rationale { margin: 0 0 14px; }
+.detail-meta { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 16px; }
+.tag { font-size: 11px; color: var(--text-soft); border: 1px solid var(--border); border-radius: 6px; padding: 1px 6px; }
+.badge { font-size: 12px; font-weight: 700; border-radius: 999px; min-width: 24px; height: 24px; padding: 0 6px; background: var(--col); color: var(--col-ink); display: inline-flex; align-items: center; justify-content: center; }
+.badge.W{--col:var(--c-W);--col-ink:var(--c-W-ink)} .badge.U{--col:var(--c-U);--col-ink:var(--c-U-ink)}
+.badge.B{--col:var(--c-B);--col-ink:var(--c-B-ink)} .badge.R{--col:var(--c-R);--col-ink:var(--c-R-ink)}
+.badge.G{--col:var(--c-G);--col-ink:var(--c-G-ink)} .badge.C{--col:var(--c-C);--col-ink:var(--c-C-ink)}
+.color-sec { margin: 0 0 18px; }
+.color-sec h3 { font-size: 14px; margin: 0 0 8px; display: flex; align-items: center; gap: 8px; }
+.tierlab { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+.tier-primary { background: var(--tier-primary); color: #06210f; }
+.tier-secondary { background: var(--tier-secondary); color: #2a1402; }
+.tier-tertiary { background: var(--tier-tertiary); color: #14171c; }
+.tier-off { background: transparent; color: var(--text-soft); border: 1px dashed var(--border); }
+.art-strip { display: flex; flex-wrap: wrap; gap: 12px; }
+fieldset.art { border: 1px solid var(--border); border-radius: 10px; margin: 0; padding: 8px; width: auto; text-align: center; }
+fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--text-soft); }
+.art img { width: 220px; max-width: 100%; border-radius: 9px; display: block; background: var(--surface-2); aspect-ratio: 488/680; object-fit: cover; }
+.art .cname { font-size: 12px; margin: 6px 0 0; }
+.no-art { color: var(--text-soft); font-size: 13px; }
+hr.sep { border: 0; border-top: 1px solid var(--border); margin: 22px 0; }
+
+/* ===== Feedback form ===== */
+.fb-form { display: flex; flex-direction: column; gap: 14px; }
+.fb-form h2 { margin: 0; font-size: 16px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field > label, .field > .lab { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--text-soft); }
+.field select, .field input, .field textarea { font-size: 15px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--text); padding: 10px 12px; }
+.field textarea { min-height: 120px; resize: vertical; }
+.color-toggles { display: flex; flex-wrap: wrap; gap: 8px; }
+.color-toggles label { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; border: 1px solid var(--border); border-radius: 10px; padding: 6px 10px; }
+.btn-primary { align-self: flex-start; min-height: 44px; padding: 0 20px; border: 0; border-radius: 12px; background: var(--accent); color: var(--accent-ink); font-size: 15px; font-weight: 700; cursor: pointer; }
+.btn-primary:disabled { opacity: .5; cursor: default; }
+.fb-msg { font-size: 13px; color: var(--text-soft); }
+
+/* ===== Existing feedback ===== */
+.fb-list { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+.fb-item { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); padding: 12px 14px; }
+.fb-item .meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 12px; color: var(--text-soft); margin-bottom: 6px; }
+.fb-item .who { font-weight: 700; color: var(--text); }
+.fb-item .verdict { font-weight: 700; padding: 1px 8px; border-radius: 999px; background: var(--surface-2); }
+.fb-item .note { margin: 0; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="site-header-inner">
+    <h1 class="site-title">Color Pie <small>· Review</small></h1>
+    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode" aria-pressed="false">◐</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="navrow">
+    <a id="prev" href="#">← Prev</a>
+    <a id="next" href="#">Next →</a>
+    <span class="spacer"></span>
+    <a href="index.html">All effects</a>
+  </div>
+  <div id="effect"></div>
+
+  <hr class="sep"/>
+  <form class="fb-form" id="fb-form">
+    <h2>Leave feedback</h2>
+    <div class="field">
+      <label for="verdict">Verdict on placement</label>
+      <select id="verdict" required>
+        <option value="">— choose —</option>
+        <option value="correct">Correctly placed</option>
+        <option value="wrong_color">Wrong color</option>
+        <option value="wrong_strength">Wrong strength</option>
+        <option value="borderline">Borderline</option>
+      </select>
+    </div>
+    <div class="field">
+      <span class="lab">Suggested color(s)</span>
+      <div class="color-toggles" id="colors"></div>
+    </div>
+    <div class="field">
+      <label for="strength">Suggested strength</label>
+      <select id="strength">
+        <option value="">—</option>
+        <option value="primary">Primary</option>
+        <option value="secondary">Secondary</option>
+        <option value="tertiary">Tertiary</option>
+        <option value="bend">Bend</option>
+        <option value="break">Break</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="note">Note</label>
+      <textarea id="note" maxlength="1000" placeholder="Why? Anything you'd change…"></textarea>
+    </div>
+    <div class="field">
+      <label for="name">Your name (optional)</label>
+      <input id="name" type="text" maxlength="80" placeholder="Anonymous"/>
+    </div>
+    <button class="btn-primary" type="submit" id="submit">Submit feedback</button>
+    <p class="fb-msg" id="fb-msg"></p>
+  </form>
+
+  <hr class="sep"/>
+  <h2 style="font-size:16px;margin:0 0 4px">Feedback <span id="fb-count" class="tag"></span></h2>
+  <div class="fb-list" id="fb-list"></div>
+</main>
+
+<script src="data/colorpie.js"></script>
+<script src="assets/theme.js"></script>
+<script type="module">
+import { addFeedback, listFeedback } from './assets/feedback.js';
+
+var COLORS = [['W','White'],['U','Blue'],['B','Black'],['R','Red'],['G','Green'],['C','Colorless']];
+var TIERWORD = { primary:'Primary', secondary:'Secondary', tertiary:'Tertiary' };
+var ARCH = { onRate:'On-rate', cheapest:'Cheapest', iconic:'Iconic', bendBreak:'Bend/Break' };
+var VERDICT = { correct:'Correctly placed', wrong_color:'Wrong color', wrong_strength:'Wrong strength', borderline:'Borderline' };
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+function cardImg(name){ var v = CARDS[name]; if(!v) return ''; return /^https?:/.test(v) ? v : 'https://cards.scryfall.io/normal/front/'+v[0]+'/'+v[1]+'/'+v+'.jpg'; }
+
+var id = new URLSearchParams(location.search).get('id');
+var i = COLORPIE.findIndex(function(e){ return String(e.id) === String(id); });
+if (i === -1) {
+  document.getElementById('effect').innerHTML = '<p class="no-art">Effect not found. <a href="index.html">Back to all effects</a></p>';
+  document.getElementById('fb-form').hidden = true;
+} else {
+  renderEffect(COLORPIE[i]);
+  wirePrevNext(i);
+  wireForm(COLORPIE[i]);
+  refreshList(COLORPIE[i]);
+}
+
+function renderEffect(eff){
+  document.title = 'Review: ' + eff.title + ' — Color Pie';
+  var meta = [['Interaction',eff.interaction],['Duration',eff.duration],['Base keyword',eff.baseKeyword]]
+    .filter(function(m){return m[1];})
+    .map(function(m){return '<span class="tag">'+m[0]+': '+esc(m[1])+'</span>';}).join('');
+  var TORDER = { primary:0, secondary:1, tertiary:2 };
+  var trank = function(k){ var v=TORDER[eff.rank[k]]; return v==null?3:v; };
+  var secs = COLORS.slice().sort(function(a,b){return trank(a[0])-trank(b[0]);}).map(function(c){
+    var t = eff.rank[c[0]];
+    var picks = t ? ['onRate','cheapest','iconic'] : ['bendBreak'];
+    var cell = eff.cards[c[0]] || {};
+    var arts = picks.filter(function(p){return cell[p];}).map(function(p){
+      var name = cell[p], img = cardImg(name);
+      return '<fieldset class="art"><legend>'+ARCH[p]+'</legend>'+
+        (img?'<img loading="lazy" src="'+esc(img)+'" alt="'+esc(name)+'"/>':'')+
+        '<p class="cname">'+esc(name)+'</p></fieldset>';
+    }).join('');
+    var lab = t ? '<span class="tierlab tier-'+t+'">'+TIERWORD[t]+'</span>'
+                : '<span class="tierlab tier-off">Off-pie</span>';
+    return '<div class="color-sec"><h3><span class="badge '+c[0]+'" title="'+c[1]+'"></span>'+c[1]+lab+'</h3>'+
+      (arts?'<div class="art-strip">'+arts+'</div>':'<p class="no-art">No example card.</p>')+'</div>';
+  }).join('');
+  document.getElementById('effect').innerHTML =
+    '<h2 class="eff-title">'+esc(eff.title)+'</h2>'+
+    '<p class="eff-sub">'+esc(eff.type)+(eff.category?' · '+esc(eff.category):'')+'</p>'+
+    '<p class="rationale">'+esc(eff.rationale||'')+'</p>'+
+    (meta?'<div class="detail-meta">'+meta+'</div>':'')+secs;
+  // color toggles
+  document.getElementById('colors').innerHTML = COLORS.map(function(c){
+    return '<label><input type="checkbox" value="'+c[0]+'"/> '+c[1]+'</label>';
+  }).join('');
+}
+
+function wirePrevNext(i){
+  var prev = document.getElementById('prev'), next = document.getElementById('next');
+  if (i > 0) prev.href = 'review.html?id=' + encodeURIComponent(COLORPIE[i-1].id);
+  else prev.setAttribute('aria-disabled','true');
+  if (i < COLORPIE.length-1) next.href = 'review.html?id=' + encodeURIComponent(COLORPIE[i+1].id);
+  else next.setAttribute('aria-disabled','true');
+}
+
+function wireForm(eff){
+  var form = document.getElementById('fb-form'), msg = document.getElementById('fb-msg'), btn = document.getElementById('submit');
+  form.addEventListener('submit', async function(e){
+    e.preventDefault();
+    var verdict = document.getElementById('verdict').value;
+    if (!verdict) { msg.textContent = 'Pick a verdict first.'; return; }
+    var payload = { verdict: verdict };
+    var colors = [].map.call(document.querySelectorAll('#colors input:checked'), function(c){return c.value;});
+    if (colors.length) payload.suggestedColors = colors;
+    var strength = document.getElementById('strength').value; if (strength) payload.suggestedStrength = strength;
+    var note = document.getElementById('note').value.trim(); if (note) payload.note = note.slice(0,1000);
+    var name = document.getElementById('name').value.trim(); if (name) payload.reviewerName = name.slice(0,80);
+    btn.disabled = true; msg.textContent = 'Saving…';
+    try {
+      await addFeedback(String(eff.id), payload);
+      form.reset();
+      msg.textContent = 'Thanks — feedback saved.';
+      await refreshList(eff);
+    } catch (err) {
+      msg.textContent = 'Could not save: ' + (err && err.message ? err.message : err);
+    } finally { btn.disabled = false; }
+  });
+}
+
+async function refreshList(eff){
+  var list = document.getElementById('fb-list'), count = document.getElementById('fb-count');
+  var rows;
+  try { rows = await listFeedback(String(eff.id)); }
+  catch (err) { list.innerHTML = '<p class="no-art">Could not load feedback: '+esc(err.message||String(err))+'</p>'; return; }
+  count.textContent = rows.length;
+  if (!rows.length) { list.innerHTML = '<p class="no-art">No feedback yet — be the first.</p>'; return; }
+  list.innerHTML = rows.map(function(r){
+    var when = r.createdAt && r.createdAt.toDate ? r.createdAt.toDate().toLocaleDateString() : '';
+    var extra = [];
+    if (r.suggestedColors && r.suggestedColors.length) extra.push('→ ' + r.suggestedColors.join(''));
+    if (r.suggestedStrength) extra.push(r.suggestedStrength);
+    return '<div class="fb-item"><div class="meta">'+
+      '<span class="who">'+esc(r.reviewerName||'Anonymous')+'</span>'+
+      '<span class="verdict">'+esc(VERDICT[r.verdict]||r.verdict)+'</span>'+
+      (extra.length?'<span>'+esc(extra.join(' · '))+'</span>':'')+
+      (when?'<span>'+esc(when)+'</span>':'')+
+      '</div>'+(r.note?'<p class="note">'+esc(r.note)+'</p>':'')+'</div>';
+  }).join('');
+}
+</script>
+</body>
+</html>
