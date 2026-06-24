@@ -1,0 +1,40 @@
+rules_version = '2';
+// Effect feedback: anyone may read and create one validated comment (4 free-text
+// fields, ≥1 filled). Only the owner (signed in via Google) may update status/reply
+// to moderate. No client deletes. Deploy: firebase deploy --only firestore:rules
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /feedback/{id} {
+      allow read: if true;
+      allow create: if isValidCreate(request.resource.data);
+      allow update: if isOwner() && isModeration(request.resource.data, resource.data);
+      allow delete: if false;
+    }
+  }
+}
+
+function strOk(d, f, max) {
+  return !(f in d) || (d[f] is string && d[f].size() <= max);
+}
+function nonEmpty(d, f) {
+  return (f in d) && d[f] is string && d[f].size() > 0;
+}
+function isValidCreate(d) {
+  return d.keys().hasOnly(['effectId','colorTiers','cardExamples','scopeDuplicate','otherMetadata','reviewerName','createdAt'])
+    && d.effectId is string && d.effectId.size() > 0 && d.effectId.size() <= 40
+    && strOk(d,'colorTiers',1000) && strOk(d,'cardExamples',1000)
+    && strOk(d,'scopeDuplicate',1000) && strOk(d,'otherMetadata',1000)
+    && strOk(d,'reviewerName',80)
+    && (nonEmpty(d,'colorTiers') || nonEmpty(d,'cardExamples') || nonEmpty(d,'scopeDuplicate') || nonEmpty(d,'otherMetadata'))
+    && d.createdAt == request.time;
+}
+function isOwner() {
+  return request.auth != null
+    && request.auth.token.email == 'charp.max@gmail.com'
+    && request.auth.token.email_verified == true;
+}
+function isModeration(d, prev) {
+  return d.diff(prev).affectedKeys().hasOnly(['status','reply'])
+    && (!('status' in d) || d.status in ['pending','accepted','rejected'])
+    && (!('reply' in d) || (d.reply is string && d.reply.size() <= 1000));
+}
