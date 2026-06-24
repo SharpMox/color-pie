@@ -70,7 +70,10 @@ read('Effects Rankings.csv').forEach(r => {
 });
 
 // ---- Effects ----
-const effects = read('Effects.csv').map(r => {
+const effects = read('Effects.csv')
+  // ponytail: keep Notion's "Sort Order" as the natural row order; no-op if the column is absent
+  .sort((a, b) => (Number(a['Sort Order']) || 0) - (Number(b['Sort Order']) || 0))
+  .map(r => {
   const title = r['Effect'];
   if (!title) return null;
   const base = relNames(r['Ranking'])[0] || title.split(' — ')[0];
