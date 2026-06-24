@@ -237,18 +237,16 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
   var query = '';
   var filt = { type:'', category:'', interaction:new Set(), duration:new Set(), baseKeyword:new Set() };
 
-  // ----- Build groups (base effect + its variants), first-appearance order -----
+  // ----- Build groups: effects sharing a `base` label, first-appearance order.
+  // `base` is a grouping label (the Ranking relation), not necessarily a real
+  // effect row; the first member of each group is its anchor (summary row). -----
   COLORPIE.forEach(function (e, i) { e._i = i; });
   var byBase = {}, order = [];
   COLORPIE.forEach(function (e) {
-    if (!byBase[e.base]) { byBase[e.base] = { base:e.base, baseEffect:null, variants:[] }; order.push(e.base); }
-    if (e.isVariant) byBase[e.base].variants.push(e); else byBase[e.base].baseEffect = e;
+    if (!byBase[e.base]) { byBase[e.base] = { base:e.base, members:[] }; order.push(e.base); }
+    byBase[e.base].members.push(e);
   });
   var GROUPS = order.map(function (b) { return byBase[b]; });
-  // most groups have NO standalone base row (e.g. "Flying" exists only as its
-  // variants); promote the first variant as the group's anchor. `base` is a
-  // grouping label (the Ranking relation), not necessarily a real effect row.
-  GROUPS.forEach(function (g) { if (!g.baseEffect) g.baseEffect = g.variants.shift(); });
 
   // ----- Helpers -----
   function haystack(e) {
@@ -279,7 +277,7 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
   function passesColor(g) {
     if (!selected.size) return false;                  // no colors → dim all, prompt to pick
     if (selected.size === COLORS.length) return true;
-    var rank = g.baseEffect.rank;
+    var rank = g.members[0].rank;
     if (tier === 'offpie') { for (var k of selected) if (rank[k]) return false; return true; }
     for (var k of selected) if (tier === 'all' ? rank[k] : rank[k] === tier) return true;
     return false;
@@ -319,7 +317,7 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
   // as a bare row.
   function groupWrap(g, isGroup, rows, open) {
     var inner = rows.map(function (e) { return rowHTML(e, isGroup); }).join('');
-    var be = g.baseEffect;
+    var be = g.members[0];
     return isGroup ? '<details class="group"' + (open ? ' open' : '') + '><summary>' +
       '<span class="cell-main"><span class="row-name">' + esc(g.base) + '</span>' +
       '<span class="row-tags"><span class="tag">' + esc(be.type) + '</span>' +
@@ -334,7 +332,7 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
     var filtering = !!query || !!filt.type || !!filt.category ||
       !!filt.interaction.size || !!filt.duration.size || !!filt.baseKeyword.size;
     GROUPS.forEach(function (g) {   // natural data order; color picker filters, never sorts
-      var members = [g.baseEffect].concat(g.variants);
+      var members = g.members;
       var isGroup = members.length > 1;
       var colorOk = passesColor(g);
       var res = colorOk ? members.filter(passesRow) : [];
@@ -487,10 +485,10 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
   (function selftest() {
     var save = selected;                  // restore after — don't desync the rendered picker
     selected = new Set(['U']);            // strict subset → color filter active
-    console.assert(passesColor({ baseEffect: { rank: { U: 'primary' } } }), 'in-pie passes color filter');
-    console.assert(!passesColor({ baseEffect: { rank: { U: null } } }), 'off-pie filtered out');
+    console.assert(passesColor({ members: [{ rank: { U: 'primary' } }] }), 'in-pie passes color filter');
+    console.assert(!passesColor({ members: [{ rank: { U: null } }] }), 'off-pie filtered out');
     selected = new Set();
-    console.assert(!passesColor({ baseEffect: { rank: {} } }), 'no colors dims all');
+    console.assert(!passesColor({ members: [{ rank: {} }] }), 'no colors dims all');
     selected = save;
   })();
 })();

@@ -88,9 +88,8 @@ const effects = read('Effects.csv')
     if (Object.keys(c).length) cards[k] = c;
   });
   return {
-    // isVariant is true for every row in a keyword group (base = the Ranking
-    // relation, which rarely matches a row's own title), so most rows are variants.
-    title, base, isVariant: base !== title,
+    title, base,                 // base = group label (Notion Ranking relation), not a real row
+
     type: r['Type'] || '',
     category: relNames(r['Category'])[0] || '',
     rationale: r['Design Rationale'] || '',
