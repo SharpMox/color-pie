@@ -130,7 +130,8 @@ fieldset.art { border: 1px solid var(--border); border-radius: 10px; margin: 0; 
 fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--text-soft); }
 fieldset.art.bendbreak { border-color: var(--c-R); }
 fieldset.art.bendbreak > legend { color: var(--c-R); }
-.art img { width: 300px; max-width: 100%; border-radius: 9px; display: block; background: var(--surface-2); aspect-ratio: 488/680; object-fit: cover; }
+.art img { width: 300px; max-width: 100%; border-radius: 9px; display: block; background: var(--surface-2); aspect-ratio: 488/680; object-fit: cover; cursor: zoom-in; }
+.img-preview { position: fixed; z-index: 80; width: 420px; max-width: 46vw; border-radius: 14px; border: 1px solid var(--border); box-shadow: var(--shadow); background: var(--surface-2); aspect-ratio: 488/680; object-fit: cover; pointer-events: none; }
 .art .cname { font-size: 12px; margin: 6px 0 0; }
 .no-art { color: var(--text-soft); font-size: 13px; }
 
@@ -223,6 +224,7 @@ fieldset.art.bendbreak > legend { color: var(--c-R); }
     <button class="detail-close" id="d-close" aria-label="Close">×</button>
   </div>
   <div class="detail-body" id="d-body"></div>
+  <img id="img-preview" class="img-preview" alt="" hidden/>
 </dialog>
 
 <script src="data/colorpie.js"></script>
@@ -407,6 +409,23 @@ fieldset.art.bendbreak > legend { color: var(--c-R); }
   }
   document.getElementById('d-close').addEventListener('click', function () { dlg.close(); });
   dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); }); // backdrop
+
+  // hover card preview (inside the dialog so it shares the modal top layer)
+  var preview = document.getElementById('img-preview');
+  var dBody = document.getElementById('d-body');
+  function placePreview(x, y) {
+    var pw = preview.offsetWidth, ph = preview.offsetHeight;
+    var px = x + 24; if (px + pw > window.innerWidth - 8) px = x - 24 - pw;
+    var py = Math.min(Math.max(8, y - ph / 2), window.innerHeight - ph - 8);
+    preview.style.left = px + 'px'; preview.style.top = py + 'px';
+  }
+  dBody.addEventListener('mouseover', function (e) {
+    var img = e.target.closest('.art img'); if (!img || !img.src) return;
+    preview.src = img.src; preview.hidden = false; placePreview(e.clientX, e.clientY);
+  });
+  dBody.addEventListener('mousemove', function (e) { if (!preview.hidden) placePreview(e.clientX, e.clientY); });
+  dBody.addEventListener('mouseout', function (e) { if (e.target.closest('.art img')) preview.hidden = true; });
+  dlg.addEventListener('close', function () { preview.hidden = true; });
 
   // ----- Wire controls -----
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]; }); }

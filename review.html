@@ -40,7 +40,8 @@ fieldset.art { border: 1px solid var(--border); border-radius: 8px; margin: 0; p
 fieldset.art > legend { margin: 0 auto; padding: 0 6px; font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-soft); }
 fieldset.art.bendbreak { border-color: var(--c-R); }
 fieldset.art.bendbreak > legend { color: var(--c-R); }
-.art img { width: 182px; max-width: 100%; border-radius: 7px; display: block; background: var(--surface-2); aspect-ratio: 488/680; object-fit: cover; }
+.art img { width: 182px; max-width: 100%; border-radius: 7px; display: block; background: var(--surface-2); aspect-ratio: 488/680; object-fit: cover; cursor: zoom-in; }
+.img-preview { position: fixed; z-index: 80; width: 360px; max-width: 46vw; border-radius: 14px; border: 1px solid var(--border); box-shadow: var(--shadow); background: var(--surface-2); aspect-ratio: 488/680; object-fit: cover; pointer-events: none; }
 .art .cname { font-size: 16px; margin: 4px 0 0; }
 .no-art { color: var(--text-soft); font-size: 16px; }
 hr.sep { border: 0; border-top: 1px solid var(--border); margin: 18px 0; }
@@ -132,6 +133,7 @@ hr.sep { border: 0; border-top: 1px solid var(--border); margin: 18px 0; }
   </div>
   <div class="drawer-body"><div class="fb-list" id="fb-list"></div></div>
 </aside>
+<img id="img-preview" class="img-preview" alt="" hidden/>
 
 <script src="data/colorpie.js"></script>
 <script src="assets/theme.js"></script>
@@ -161,6 +163,22 @@ function closeDrawer(){ drawer.classList.remove('open'); drawerBg.hidden = true;
 document.getElementById('fb-toggle').addEventListener('click', openDrawer);
 document.getElementById('drawer-close').addEventListener('click', closeDrawer);
 drawerBg.addEventListener('click', closeDrawer);
+
+// ----- hover card preview (floating, follows cursor; fixed so the scroll row can't clip it)
+var preview = document.getElementById('img-preview');
+var effectEl = document.getElementById('effect');
+function placePreview(x, y){
+  var pw = preview.offsetWidth, ph = preview.offsetHeight;
+  var px = x + 24; if (px + pw > window.innerWidth - 8) px = x - 24 - pw;   // flip left near right edge
+  var py = Math.min(Math.max(8, y - ph / 2), window.innerHeight - ph - 8);
+  preview.style.left = px + 'px'; preview.style.top = py + 'px';
+}
+effectEl.addEventListener('mouseover', function(e){
+  var img = e.target.closest('.art img'); if (!img || !img.src) return;
+  preview.src = img.src; preview.hidden = false; placePreview(e.clientX, e.clientY);
+});
+effectEl.addEventListener('mousemove', function(e){ if (!preview.hidden) placePreview(e.clientX, e.clientY); });
+effectEl.addEventListener('mouseout', function(e){ if (e.target.closest('.art img')) preview.hidden = true; });
 
 function renderEffect(eff){
   document.title = 'Review: ' + eff.title + ' — Color Pie';
