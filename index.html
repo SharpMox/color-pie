@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="assets/site.css"/>
 <style>
 /* ===== Layout ===== */
-.wrap { max-width: 1100px; margin: 0 auto; padding: 14px 16px 60px; --cols: minmax(0,1fr) 88px 88px 88px; }
+.wrap { max-width: 1100px; margin: 0 auto; padding: 14px 16px 60px; --cols: minmax(0,1fr) 100px 88px 88px 88px; }
 
 /* ===== Controls ===== */
 .controls { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
@@ -85,6 +85,7 @@ details.group[open] > summary .row-name::before { transform: rotate(90deg); }
 details.group[open] { border: 1px solid var(--border); border-radius: 12px; padding: 6px; }
 details.group[open] > summary { border: 0; background: transparent; }
 details.group[open] > summary .tier-cell,
+details.group[open] > summary .review-cell,
 details.group[open] > summary .row-tags { display: none; }
 details.group[open] > .row { margin-top: 6px; }
 .row {
@@ -111,14 +112,19 @@ details.group[open] > .row { margin-top: 6px; }
 /* ===== Detail dialog ===== */
 dialog.detail { border: none; border-radius: 16px; padding: 0; background: var(--surface); color: var(--text); box-shadow: var(--shadow); max-width: 760px; width: calc(100% - 24px); }
 dialog.detail::backdrop { background: rgba(0,0,0,.5); }
-.detail-head { position: sticky; top: 0; background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 16px; display: flex; align-items: flex-start; gap: 10px; }
+.detail-head { position: sticky; top: 0; z-index: 1; background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 16px; }
+.detail-head-row { display: flex; align-items: flex-start; gap: 10px; }
 .detail-head h2 { margin: 0; font-size: 18px; }
 .detail-head .tag { margin-top: 4px; }
-.detail-close { margin-left: auto; width: 38px; height: 38px; flex: none; border: 1px solid var(--border); border-radius: 9px; background: var(--surface-2); color: var(--text); font-size: 18px; cursor: pointer; }
+.detail-head .rationale { margin: 10px 0 0; color: var(--text); }
+.detail-head .detail-meta { margin: 10px 0 0; }
+#d-type, .detail-meta .tag { font-size: 14px; color: rgba(255,255,255,.75); }
+.detail-close { width: 38px; height: 38px; flex: none; border: 1px solid var(--border); border-radius: 9px; background: var(--surface-2); color: var(--text); font-size: 18px; cursor: pointer; }
 .detail-body { padding: 14px 16px 20px; }
 .detail-body .rationale { margin: 0 0 14px; color: var(--text); }
 .detail-meta { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 16px; }
-.color-sec { margin: 0 0 18px; }
+.color-sec { margin: 0; padding: 12px 14px; border-radius: 10px; }  /* base = current modal bg */
+.color-sec.alt { background: rgba(128,128,128,.2); }                /* alternate row shade (stronger contrast, both themes) */
 .color-sec h3 { font-size: 14px; margin: 0 0 8px; display: flex; align-items: center; gap: 8px; }
 .color-sec .tierlab { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
 .tier-primary { background: var(--tier-primary); color: #06210f; }
@@ -126,17 +132,30 @@ dialog.detail::backdrop { background: rgba(0,0,0,.5); }
 .tier-tertiary { background: var(--tier-tertiary); color: #14171c; }
 .tier-off { background: transparent; color: var(--text-soft); border: 1px dashed var(--border); }
 .art-strip { display: flex; flex-wrap: wrap; gap: 12px; }
-fieldset.art { border: 1px solid var(--border); border-radius: 10px; margin: 0; padding: 8px; width: auto; text-align: center; }
-fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--text-soft); }
-.art img { width: 300px; max-width: 100%; border-radius: 9px; display: block; background: var(--surface-2); aspect-ratio: 488/680; object-fit: cover; }
+fieldset.art { border: 1px solid rgba(255,255,255,.4); border-radius: 10px; margin: 0; padding: 8px; width: auto; text-align: center; }
+fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: #fff; }
+fieldset.art.bendbreak { border-color: var(--c-R); }
+fieldset.art.bendbreak > legend { color: var(--c-R); }
+.art img { width: 182px; max-width: 100%; border-radius: 9px; display: block; background: var(--surface-2); aspect-ratio: 488/680; object-fit: cover; cursor: zoom-in; }
+.img-preview { position: fixed; z-index: 80; width: 420px; max-width: 46vw; border-radius: 14px; border: 1px solid var(--border); box-shadow: var(--shadow); background: var(--surface-2); aspect-ratio: 488/680; object-fit: cover; pointer-events: none; }
 .art .cname { font-size: 12px; margin: 6px 0 0; }
 .no-art { color: var(--text-soft); font-size: 13px; }
+
+/* Review affordance (row pill + modal button) */
+.review-cell { display: flex; justify-content: center; align-items: center; }
+.review { font-size: 11px; font-weight: 600; color: var(--accent); border: 1px solid var(--border); border-radius: 6px; padding: 3px 8px; cursor: pointer; white-space: nowrap; }
+.review:hover { border-color: var(--accent); }
+.review.review-disabled { color: var(--text-soft); }  /* group summary: click expands to reveal each variant's review button */
+.review.has-accepted, .detail-review.has-accepted { color: var(--c-G); border-color: var(--c-G); }  /* ≥1 accepted feedback */
+.detail-review { margin-left: auto; min-height: 38px; padding: 0 14px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface-2); color: var(--text); font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; }
+.detail-review:hover { border-color: var(--accent); }
 
 /* ===== Mobile: stack rows (name on top, tags + labeled P/S/T columns below) ===== */
 @media (max-width: 560px) {
   .list-head { display: none; }                 /* tabular header doesn't map to stacked rows */
-  .row, details.group > summary { grid-template-columns: repeat(3, 1fr); row-gap: 10px; padding: 12px; }
+  .row, details.group > summary { grid-template-columns: repeat(4, 1fr); row-gap: 10px; padding: 12px; }
   .cell-main { grid-column: 1 / -1; }            /* name + tags take the full first line */
+  .review-cell { justify-content: flex-start; }
   .row-name { font-size: 13.5px; }
   .tier-cell { display: block; text-align: center; }
   .tier-cell::before { content: attr(data-label); display: block; font-size: 10px; font-weight: 700; color: var(--text-soft); margin-bottom: 3px; }
@@ -198,6 +217,7 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
   <p class="count" id="count"></p>
   <div class="list-head" id="list-head">
     <span>Effect</span>
+    <span class="th-tier">Review</span>
     <span class="th-tier"><span class="full">Primary</span><span class="abbr">P</span></span>
     <span class="th-tier"><span class="full">Secondary</span><span class="abbr">S</span></span>
     <span class="th-tier"><span class="full">Tertiary</span><span class="abbr">T</span></span>
@@ -207,13 +227,19 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
 
 <dialog class="detail" id="detail">
   <div class="detail-head">
-    <div>
-      <h2 id="d-title"></h2>
-      <span class="tag" id="d-type"></span>
+    <div class="detail-head-row">
+      <div>
+        <h2 id="d-title"></h2>
+        <span class="tag" id="d-type"></span>
+      </div>
+      <a class="detail-review" id="d-review" href="#">Review</a>
+      <button class="detail-close" id="d-close" aria-label="Close">×</button>
     </div>
-    <button class="detail-close" id="d-close" aria-label="Close">×</button>
+    <p class="rationale" id="d-rationale"></p>
+    <div class="detail-meta" id="d-meta"></div>
   </div>
   <div class="detail-body" id="d-body"></div>
+  <img id="img-preview" class="img-preview" alt="" hidden/>
 </dialog>
 
 <script src="data/colorpie.js"></script>
@@ -235,6 +261,7 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
   var selected = new Set(['W','U','B','R','G','C']);   // all colors on by default
   var tier = 'all';
   var query = '';
+  var fbCounts = {};   // effect id -> feedback count; filled async by the feedback module
   var filt = { type:'', category:'', interaction:new Set(), duration:new Set(), baseKeyword:new Set() };
 
   // ----- Build groups: effects sharing a `base` label, first-appearance order.
@@ -302,10 +329,13 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
     }).join('');
   }
   function rowHTML(e, grouped) {
+    var c = fbCounts[e.id] || { total: 0, accepted: 0 };
     return '<button class="row' + (grouped ? ' grouped' : '') + '" data-eff="' + e._i + '">' +
       '<div class="cell-main"><span class="row-name">' + esc(e.title) + '</span>' +
       '<span class="row-tags"><span class="tag">' + esc(e.type) + '</span>' +
-      (e.category ? '<span class="tag">' + esc(e.category) + '</span>' : '') + '</span></div>' +
+      (e.category ? '<span class="tag">' + esc(e.category) + '</span>' : '') +
+      '</span></div>' +
+      '<div class="review-cell"><span class="review' + (c.accepted ? ' has-accepted' : '') + '" data-id="' + esc(e.id) + '">Review (' + c.total + ')</span></div>' +
       tierCells(e) +
     '</button>';
   }
@@ -318,10 +348,14 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
   function groupWrap(g, isGroup, rows, open) {
     var inner = rows.map(function (e) { return rowHTML(e, isGroup); }).join('');
     var be = g.members[0];
+    var gcounts = g.members.map(function (m) { return fbCounts[m.id] || { total: 0, accepted: 0 }; });
+    var gn = gcounts.reduce(function (s, c) { return s + c.total; }, 0);
+    var allGreen = gcounts.every(function (c) { return c.accepted > 0; });   // every variant has ≥1 accepted
     return isGroup ? '<details class="group"' + (open ? ' open' : '') + '><summary>' +
       '<span class="cell-main"><span class="row-name">' + esc(g.base) + '</span>' +
       '<span class="row-tags"><span class="tag">' + esc(be.type) + '</span>' +
       (be.category ? '<span class="tag">' + esc(be.category) + '</span>' : '') + '</span></span>' +
+      '<div class="review-cell"><span class="review review-disabled' + (allGreen ? ' has-accepted' : '') + '" title="Expand to review each variant">Review (' + gn + ')</span></div>' +
       tierCells(be) + '</summary>' + inner + '</details>' : inner;
   }
   function render() {
@@ -355,41 +389,64 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
     var cols = selected.size
       ? COLORS.filter(function (c) { return selected.has(c.k); })
       : COLORS;
-    var meta = [['Interaction', eff.interaction], ['Duration', eff.duration], ['Base keyword', eff.baseKeyword]]
-      .filter(function (m) { return m[1]; })
-      .map(function (m) { return '<span class="tag">' + m[0] + ': ' + esc(m[1]) + '</span>'; }).join('');
+    // (rationale + meta now render in the sticky modal header — see openDetail)
     // order sections by this effect's tier: Primary, Secondary, Tertiary, then off-pie
     // (stable sort keeps WUBRG order within each tier)
     var TORDER = { primary: 0, secondary: 1, tertiary: 2 };
     var trank = function (c) { var v = TORDER[eff.rank[c.k]]; return v == null ? 3 : v; };
-    var secs = cols.slice().sort(function (a, b) { return trank(a) - trank(b); }).map(function (c) {
+    var secs = cols.slice().sort(function (a, b) { return trank(a) - trank(b); }).map(function (c, i) {
       var t = eff.rank[c.k];
       var picks = t ? ['onRate','cheapest','iconic'] : ['bendBreak'];
       var cell = eff.cards[c.k] || {};
       var arts = picks.filter(function (p) { return cell[p]; }).map(function (p) {
         var name = cell[p], img = cardImg(name);
-        return '<fieldset class="art"><legend>' + ARCH[p] + '</legend>' +
+        return '<fieldset class="art' + (p === 'bendBreak' ? ' bendbreak' : '') + '"><legend>' + ARCH[p] + '</legend>' +
           (img ? '<img loading="lazy" src="' + esc(img) + '" alt="' + esc(name) + '"/>' : '') +
           '<p class="cname">' + esc(name) + '</p></fieldset>';
       }).join('');
       var lab = t ? '<span class="tierlab tier-' + t + '">' + TIERWORD[t] + '</span>'
                   : '<span class="tierlab tier-off">Off-pie</span>';
-      return '<div class="color-sec"><h3><span class="badge ' + c.k + '" title="' + c.name + '"></span>' + c.name + lab + '</h3>' +
+      return '<div class="color-sec' + (i % 2 ? ' alt' : '') + '"><h3><span class="badge ' + c.k + '" title="' + c.name + '"></span>' + c.name + lab + '</h3>' +
         (arts ? '<div class="art-strip">' + arts + '</div>' : '<p class="no-art">No example card.</p>') + '</div>';
     }).join('');
-    return '<p class="rationale">' + esc(eff.rationale || '') + '</p>' +
-      (meta ? '<div class="detail-meta">' + meta + '</div>' : '') + secs;
+    return secs;
   }
   var dlg = document.getElementById('detail');
   function openDetail(i) {
     var eff = COLORPIE[i];
     document.getElementById('d-title').textContent = eff.title;
     document.getElementById('d-type').textContent = eff.type + (eff.category ? ' · ' + eff.category : '');
+    document.getElementById('d-rationale').textContent = eff.rationale || '';
+    document.getElementById('d-meta').innerHTML = [['Interaction', eff.interaction], ['Duration', eff.duration], ['Base keyword', eff.baseKeyword]]
+      .filter(function (m) { return m[1]; })
+      .map(function (m) { return '<span class="tag">' + m[0] + ': ' + esc(m[1]) + '</span>'; }).join('');
     document.getElementById('d-body').innerHTML = detailHTML(eff);
+    var c = fbCounts[eff.id] || { total: 0, accepted: 0 };
+    var rev = document.getElementById('d-review');
+    rev.href = 'review.html?id=' + encodeURIComponent(eff.id);
+    rev.textContent = 'Review (' + c.total + ')';
+    rev.classList.toggle('has-accepted', c.accepted > 0);
     if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open','');
   }
   document.getElementById('d-close').addEventListener('click', function () { dlg.close(); });
   dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); }); // backdrop
+
+  // hover card preview (inside the dialog so it shares the modal top layer)
+  var preview = document.getElementById('img-preview');
+  var dBody = document.getElementById('d-body');
+  function placePreview(x, y) {
+    var pw = preview.offsetWidth, ph = preview.offsetHeight;
+    var px = x + 24; if (px + pw > window.innerWidth - 8) px = x - 24 - pw;
+    var py = Math.min(Math.max(8, y - ph / 2), window.innerHeight - ph - 8);
+    preview.style.left = px + 'px'; preview.style.top = py + 'px';
+  }
+  dBody.addEventListener('mouseover', function (e) {
+    var img = e.target.closest('.art img'); if (!img || !img.src) return;
+    preview.src = img.src; preview.hidden = false; placePreview(e.clientX, e.clientY);
+  });
+  dBody.addEventListener('mousemove', function (e) { if (!preview.hidden) placePreview(e.clientX, e.clientY); });
+  dBody.addEventListener('mouseout', function (e) { if (e.target.closest('.art img')) preview.hidden = true; });
+  dlg.addEventListener('close', function () { preview.hidden = true; });
 
   // ----- Wire controls -----
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]; }); }
@@ -466,11 +523,17 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
   buildChips('f-duration',    uniq(function (e) { return e.duration; }),    'duration');
   buildChips('f-baseKeyword', uniq(function (e) { return e.baseKeyword; }), 'baseKeyword');
 
-  // row click → detail (delegation)
+  // row click → detail (delegation); the Review pill navigates instead
   document.getElementById('list').addEventListener('click', function (e) {
+    var rev = e.target.closest('.review');
+    if (rev && rev.dataset.id) { location.href = 'review.html?id=' + encodeURIComponent(rev.dataset.id); return; }
+    if (rev) return;  // group summary pill: no nav — let the click bubble to expand the <details>
     var r = e.target.closest('.row'); if (!r) return;
     openDetail(+r.dataset.eff);
   });
+
+  // feedback counts populate badges asynchronously (see module script below)
+  window.applyFbCounts = function (counts) { fbCounts = counts || {}; render(); };
 
   // park the sticky column header just under the sticky site header
   var siteHeader = document.querySelector('.site-header');
@@ -492,6 +555,13 @@ fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-we
     selected = save;
   })();
 })();
+</script>
+<script type="module">
+// Fill the review-count badges once. Failure (e.g. Firebase not yet configured)
+// is non-fatal — the page works without counts.
+import { allCounts } from './assets/feedback.js';
+allCounts().then(function (c) { window.applyFbCounts(c); })
+  .catch(function (err) { console.warn('feedback counts unavailable:', err && err.message || err); });
 </script>
 </body>
 </html>

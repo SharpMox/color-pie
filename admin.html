@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Feedback Moderation — Color Pie</title>
+<link rel="stylesheet" href="assets/site.css"/>
+<style>
+.wrap { max-width: 860px; margin: 0 auto; padding: 14px 16px 60px; }
+.gate { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; font-size: 14px; }
+.btn { min-height: 40px; padding: 0 16px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--text); font-size: 14px; font-weight: 600; cursor: pointer; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.filterbar { display: inline-flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.filterbar button { min-height: 36px; padding: 0 14px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--text-soft); font-size: 13px; font-weight: 600; cursor: pointer; }
+.filterbar button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.queue { display: flex; flex-direction: column; gap: 12px; }
+.card { border: 1px solid var(--border); border-left-width: 4px; border-radius: 12px; background: var(--surface); padding: 14px 16px; }
+.card.st-card-accepted { border-left-color: var(--c-G); }
+.card.st-card-rejected { border-left-color: var(--c-R); }
+.card.st-card-pending { border-left-color: var(--border); }
+.chead { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; font-size: 12px; color: var(--text-soft); }
+.chead .eff { font-size: 15px; font-weight: 700; color: var(--text); }
+.chead .who { font-weight: 600; }
+.st { font-weight: 800; padding: 3px 12px; border-radius: 999px; font-size: 13px; text-transform: uppercase; letter-spacing: .03em; }
+.st-accepted { background: var(--c-G); color: var(--c-G-ink); }
+.st-pending { background: var(--surface-2); color: var(--text-soft); border: 1px dashed var(--border); }
+.st-rejected { background: var(--c-R); color: var(--c-R-ink); }
+.fb-field { margin: 0 0 6px; font-size: 14px; white-space: pre-wrap; }
+.fb-field b { color: var(--text-soft); font-weight: 600; }
+.reply-in { width: 100%; box-sizing: border-box; margin: 8px 0; min-height: 56px; resize: vertical; font-size: 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--text); padding: 8px 10px; }
+.actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.actions .acc { background: var(--c-G); border: 0; color: var(--c-G-ink); min-height: 38px; padding: 0 16px; border-radius: 9px; font-weight: 700; cursor: pointer; }
+.actions .rej { background: var(--c-R); border: 0; color: var(--c-R-ink); min-height: 38px; padding: 0 16px; border-radius: 9px; font-weight: 700; cursor: pointer; }
+.actions .acc:disabled, .actions .rej:disabled { opacity: .35; cursor: default; }
+.actions .view { margin-left: auto; font-size: 13px; color: var(--accent); text-decoration: none; }
+.empty { color: var(--text-soft); padding: 24px 4px; }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="site-header-inner">
+    <h1 class="site-title">Color Pie <small>· Moderation</small></h1>
+    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode" aria-pressed="false">◐</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="gate" id="gate"></div>
+  <div id="panel" hidden>
+    <div class="filterbar" id="filter">
+      <button data-f="all" aria-pressed="true">All</button>
+      <button data-f="pending" aria-pressed="false">Pending</button>
+      <button data-f="accepted" aria-pressed="false">Accepted</button>
+      <button data-f="rejected" aria-pressed="false">Rejected</button>
+    </div>
+    <div class="queue" id="queue"></div>
+  </div>
+</main>
+
+<script src="data/colorpie.js"></script>
+<script src="assets/theme.js"></script>
+<script type="module">
+import { col } from './assets/feedback.js';
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { getDocs, doc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+var OWNER = 'charp.max@gmail.com';
+var auth = getAuth();
+var TITLE = {}; COLORPIE.forEach(function(e){ TITLE[String(e.id)] = e.title; });
+var FIELD_IDS = ['colorTiers','cardExamples','scopeDuplicate','otherMetadata'];
+var FIELD_LABEL = { colorTiers:'Color tiers', cardExamples:'Card examples', scopeDuplicate:'Scope / duplicates', otherMetadata:'Other metadata' };
+var GROUP = { pending:0, accepted:1, rejected:2 };
+var STATUS_LABEL = { pending:'Pending', accepted:'Accepted', rejected:'Rejected' };
+var STATUS_MARK = { pending:'● ', accepted:'✓ ', rejected:'✕ ' };
+var filter = 'all';
+var ALL = [];
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+
+// ----- auth gate -----
+var gate = document.getElementById('gate'), panel = document.getElementById('panel');
+onAuthStateChanged(auth, function(user){
+  if (user && user.email === OWNER) {
+    gate.innerHTML = 'Signed in as <b>'+esc(user.email)+'</b> <button class="btn" id="out">Sign out</button>';
+    document.getElementById('out').addEventListener('click', function(){ signOut(auth); });
+    panel.hidden = false; load();
+  } else if (user) {
+    gate.innerHTML = 'Signed in as '+esc(user.email)+' — not authorized to moderate. <button class="btn" id="out">Sign out</button>';
+    document.getElementById('out').addEventListener('click', function(){ signOut(auth); });
+    panel.hidden = true;
+  } else {
+    gate.innerHTML = '<button class="btn primary" id="in">Sign in with Google</button>';
+    document.getElementById('in').addEventListener('click', function(){ signInWithPopup(auth, new GoogleAuthProvider()); });
+    panel.hidden = true;
+  }
+});
+
+// ----- queue -----
+async function load(){
+  var q = document.getElementById('queue');
+  q.innerHTML = '<p class="empty">Loading…</p>';
+  try {
+    var snap = await getDocs(col);
+    ALL = snap.docs.map(function(d){ return Object.assign({ _id: d.id }, d.data()); });
+    render();
+  } catch (err) { q.innerHTML = '<p class="empty">Could not load: '+esc(err.message||String(err))+'</p>'; }
+}
+
+function render(){
+  var q = document.getElementById('queue');
+  var rows = ALL.filter(function(r){ return filter === 'all' || (r.status||'pending') === filter; });
+  // pending-first, then by newest
+  rows.sort(function(a,b){
+    var g = GROUP[a.status||'pending'] - GROUP[b.status||'pending'];
+    if (g) return g;
+    return (b.createdAt&&b.createdAt.seconds||0) - (a.createdAt&&a.createdAt.seconds||0);
+  });
+  if (!rows.length) { q.innerHTML = '<p class="empty">No feedback'+(filter==='all'?'':' ('+filter+')')+'.</p>'; return; }
+  q.innerHTML = rows.map(cardHTML).join('');
+}
+
+function cardHTML(r){
+  var st = r.status || 'pending';
+  var when = r.createdAt && r.createdAt.toDate ? r.createdAt.toDate().toLocaleString() : '';
+  var fields = FIELD_IDS.filter(function(f){ return r[f]; }).map(function(f){
+    return '<p class="fb-field"><b>'+FIELD_LABEL[f]+':</b> '+esc(r[f])+'</p>';
+  }).join('');
+  return '<div class="card st-card-'+st+'" data-id="'+esc(r._id)+'">'+
+    '<div class="chead"><span class="eff">'+esc(TITLE[String(r.effectId)] || ('#'+r.effectId))+'</span>'+
+      '<span class="st st-'+st+'">'+STATUS_MARK[st]+STATUS_LABEL[st]+'</span>'+
+      '<span class="who">'+esc(r.reviewerName||'Anonymous')+'</span>'+
+      (when?'<span>'+esc(when)+'</span>':'')+'</div>'+
+    (fields||'<p class="fb-field"><i>(no text)</i></p>')+
+    '<textarea class="reply-in" placeholder="Reply (optional)">'+esc(r.reply||'')+'</textarea>'+
+    '<div class="actions">'+
+      '<button class="acc" data-act="accepted"'+(st==='accepted'?' disabled':'')+'>Accept</button>'+
+      '<button class="rej" data-act="rejected"'+(st==='rejected'?' disabled':'')+'>Reject</button>'+
+      '<a class="view" href="review.html?id='+encodeURIComponent(r.effectId)+'" target="_blank">View page ↗</a>'+
+    '</div></div>';
+}
+
+document.getElementById('queue').addEventListener('click', async function(e){
+  var b = e.target.closest('button[data-act]'); if (!b) return;
+  var card = e.target.closest('.card'); var id = card.dataset.id;
+  var reply = card.querySelector('.reply-in').value.trim();
+  var update = { status: b.dataset.act };
+  if (reply) update.reply = reply.slice(0,1000);
+  b.disabled = true;
+  try { await updateDoc(doc(col, id), update); await load(); }
+  catch (err) { alert('Update failed: ' + (err.message||err)); b.disabled = false; }
+});
+
+document.getElementById('filter').addEventListener('click', function(e){
+  var b = e.target.closest('button[data-f]'); if (!b) return;
+  filter = b.dataset.f;
+  [].forEach.call(this.children, function(x){ x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+  render();
+});
+</script>
+</body>
+</html>
