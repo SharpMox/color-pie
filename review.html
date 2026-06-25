@@ -14,6 +14,7 @@
 .hdr-btn:hover { border-color: var(--accent); }
 .hdr-btn[aria-disabled="true"] { opacity: .4; pointer-events: none; }
 .hdr-btn.fb-toggle { border-color: var(--accent); color: var(--accent); margin-left: auto; }
+.hdr-btn.fb-toggle.has-accepted { border-color: var(--c-G); color: var(--c-G); }
 .theme-toggle { margin-left: 0; }  /* sit right after the Feedback button, not pushed apart */
 h2.eff-title { margin: 0 0 4px; font-size: 20px; }
 .eff-sub { color: var(--text-soft); font-size: 16px; margin: 0 0 10px; }
@@ -71,13 +72,16 @@ hr.sep { border: 0; border-top: 1px solid var(--border); margin: 18px 0; }
 .fb-list { display: flex; flex-direction: column; gap: 10px; }
 .fb-group { font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--text-soft); margin: 6px 0 0; }
 .fb-group.muted { opacity: .6; }
-.fb-item { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); padding: 12px 14px; }
+.fb-item { border: 1px solid var(--border); border-left-width: 4px; border-radius: 12px; background: var(--surface); padding: 12px 14px; }
+.fb-item.st-card-accepted { border-left-color: var(--c-G); }
+.fb-item.st-card-rejected { border-left-color: var(--c-R); }
+.fb-item.st-card-pending { border-left-color: var(--border); }
 .fb-item .meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 12px; color: var(--text-soft); margin-bottom: 8px; }
 .fb-item .who { font-weight: 700; color: var(--text); }
-.st { font-weight: 700; padding: 1px 8px; border-radius: 999px; font-size: 11px; }
-.st-accepted { background: var(--tier-primary); color: #06210f; }
-.st-pending { background: var(--surface-2); color: var(--text-soft); }
-.st-rejected { background: transparent; color: var(--text-soft); border: 1px dashed var(--border); }
+.st { font-weight: 800; padding: 3px 12px; border-radius: 999px; font-size: 12px; text-transform: uppercase; letter-spacing: .03em; }
+.st-accepted { background: var(--c-G); color: var(--c-G-ink); }
+.st-pending { background: var(--surface-2); color: var(--text-soft); border: 1px dashed var(--border); }
+.st-rejected { background: var(--c-R); color: var(--c-R-ink); }
 .fb-field { margin: 0 0 6px; font-size: 13px; white-space: pre-wrap; }
 .fb-field b { color: var(--text-soft); font-weight: 600; }
 .reply { margin: 8px 0 0; padding: 8px 10px; border-left: 3px solid var(--accent); background: var(--surface-2); border-radius: 0 8px 8px 0; font-size: 13px; white-space: pre-wrap; }
@@ -147,6 +151,7 @@ var FIELD_IDS = ['colorTiers','cardExamples','scopeDuplicate','otherMetadata'];
 var FIELD_LABEL = { colorTiers:'Color tiers', cardExamples:'Card examples', scopeDuplicate:'Scope / duplicates', otherMetadata:'Other metadata' };
 var STATUS_ORDER = { accepted:0, pending:1, rejected:2 };
 var STATUS_LABEL = { accepted:'Accepted', pending:'To review', rejected:'Rejected' };
+var STATUS_MARK = { accepted:'✓ ', pending:'● ', rejected:'✕ ' };
 function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
 function cardImg(name){ var v = CARDS[name]; if(!v) return ''; return /^https?:/.test(v) ? v : 'https://cards.scryfall.io/normal/front/'+v[0]+'/'+v[1]+'/'+v+'.jpg'; }
 
@@ -253,9 +258,9 @@ function itemHTML(r){
   var fields = FIELD_IDS.filter(function(f){ return r[f]; }).map(function(f){
     return '<p class="fb-field"><b>'+FIELD_LABEL[f]+':</b> '+esc(r[f])+'</p>';
   }).join('');
-  return '<div class="fb-item"><div class="meta">'+
+  return '<div class="fb-item st-card-'+st+'"><div class="meta">'+
     '<span class="who">'+esc(r.reviewerName||'Anonymous')+'</span>'+
-    '<span class="st st-'+st+'">'+STATUS_LABEL[st]+'</span>'+
+    '<span class="st st-'+st+'">'+STATUS_MARK[st]+STATUS_LABEL[st]+'</span>'+
     (when?'<span>'+esc(when)+'</span>':'')+
     '</div>'+fields+
     (r.reply?'<p class="reply"><b>Reply:</b> '+esc(r.reply)+'</p>':'')+
@@ -268,6 +273,7 @@ async function refreshList(eff){
   try { rows = await listFeedback(String(eff.id)); }
   catch (err) { list.innerHTML = '<p class="no-art">Could not load feedback: '+esc(err.message||String(err))+'</p>'; return; }
   nEl.textContent = rows.length;
+  document.getElementById('fb-toggle').classList.toggle('has-accepted', rows.some(function (r) { return r.status === 'accepted'; }));
   if (!rows.length) { list.innerHTML = '<p class="no-art">No feedback yet — be the first.</p>'; return; }
   // listFeedback is date-desc; stable sort by status group keeps newest-first within each group
   rows.sort(function(a,b){ return (STATUS_ORDER[a.status||'pending']) - (STATUS_ORDER[b.status||'pending']); });
