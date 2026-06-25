@@ -14,20 +14,24 @@
 .filterbar button { min-height: 36px; padding: 0 14px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--text-soft); font-size: 13px; font-weight: 600; cursor: pointer; }
 .filterbar button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 .queue { display: flex; flex-direction: column; gap: 12px; }
-.card { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); padding: 14px 16px; }
+.card { border: 1px solid var(--border); border-left-width: 4px; border-radius: 12px; background: var(--surface); padding: 14px 16px; }
+.card.st-card-accepted { border-left-color: var(--c-G); }
+.card.st-card-rejected { border-left-color: var(--c-R); }
+.card.st-card-pending { border-left-color: var(--border); }
 .chead { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; font-size: 12px; color: var(--text-soft); }
 .chead .eff { font-size: 15px; font-weight: 700; color: var(--text); }
 .chead .who { font-weight: 600; }
-.st { font-weight: 700; padding: 1px 8px; border-radius: 999px; font-size: 11px; }
-.st-accepted { background: var(--tier-primary); color: #06210f; }
-.st-pending { background: var(--surface-2); color: var(--text-soft); }
-.st-rejected { background: transparent; color: var(--text-soft); border: 1px dashed var(--border); }
+.st { font-weight: 800; padding: 3px 12px; border-radius: 999px; font-size: 13px; text-transform: uppercase; letter-spacing: .03em; }
+.st-accepted { background: var(--c-G); color: var(--c-G-ink); }
+.st-pending { background: var(--surface-2); color: var(--text-soft); border: 1px dashed var(--border); }
+.st-rejected { background: var(--c-R); color: var(--c-R-ink); }
 .fb-field { margin: 0 0 6px; font-size: 14px; white-space: pre-wrap; }
 .fb-field b { color: var(--text-soft); font-weight: 600; }
 .reply-in { width: 100%; box-sizing: border-box; margin: 8px 0; min-height: 56px; resize: vertical; font-size: 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--text); padding: 8px 10px; }
 .actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-.actions .acc { background: var(--tier-primary); border: 0; color: #06210f; min-height: 38px; padding: 0 16px; border-radius: 9px; font-weight: 700; cursor: pointer; }
-.actions .rej { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); min-height: 38px; padding: 0 16px; border-radius: 9px; font-weight: 700; cursor: pointer; }
+.actions .acc { background: var(--c-G); border: 0; color: var(--c-G-ink); min-height: 38px; padding: 0 16px; border-radius: 9px; font-weight: 700; cursor: pointer; }
+.actions .rej { background: var(--c-R); border: 0; color: var(--c-R-ink); min-height: 38px; padding: 0 16px; border-radius: 9px; font-weight: 700; cursor: pointer; }
+.actions .acc:disabled, .actions .rej:disabled { opacity: .35; cursor: default; }
 .actions .view { margin-left: auto; font-size: 13px; color: var(--accent); text-decoration: none; }
 .empty { color: var(--text-soft); padding: 24px 4px; }
 </style>
@@ -67,6 +71,7 @@ var FIELD_IDS = ['colorTiers','cardExamples','scopeDuplicate','otherMetadata'];
 var FIELD_LABEL = { colorTiers:'Color tiers', cardExamples:'Card examples', scopeDuplicate:'Scope / duplicates', otherMetadata:'Other metadata' };
 var GROUP = { pending:0, accepted:1, rejected:2 };
 var STATUS_LABEL = { pending:'Pending', accepted:'Accepted', rejected:'Rejected' };
+var STATUS_MARK = { pending:'● ', accepted:'✓ ', rejected:'✕ ' };
 var filter = 'all';
 var ALL = [];
 function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
@@ -119,16 +124,16 @@ function cardHTML(r){
   var fields = FIELD_IDS.filter(function(f){ return r[f]; }).map(function(f){
     return '<p class="fb-field"><b>'+FIELD_LABEL[f]+':</b> '+esc(r[f])+'</p>';
   }).join('');
-  return '<div class="card" data-id="'+esc(r._id)+'">'+
+  return '<div class="card st-card-'+st+'" data-id="'+esc(r._id)+'">'+
     '<div class="chead"><span class="eff">'+esc(TITLE[String(r.effectId)] || ('#'+r.effectId))+'</span>'+
-      '<span class="st st-'+st+'">'+STATUS_LABEL[st]+'</span>'+
+      '<span class="st st-'+st+'">'+STATUS_MARK[st]+STATUS_LABEL[st]+'</span>'+
       '<span class="who">'+esc(r.reviewerName||'Anonymous')+'</span>'+
       (when?'<span>'+esc(when)+'</span>':'')+'</div>'+
     (fields||'<p class="fb-field"><i>(no text)</i></p>')+
     '<textarea class="reply-in" placeholder="Reply (optional)">'+esc(r.reply||'')+'</textarea>'+
     '<div class="actions">'+
-      '<button class="acc" data-act="accepted">Accept</button>'+
-      '<button class="rej" data-act="rejected">Reject</button>'+
+      '<button class="acc" data-act="accepted"'+(st==='accepted'?' disabled':'')+'>Accept</button>'+
+      '<button class="rej" data-act="rejected"'+(st==='rejected'?' disabled':'')+'>Reject</button>'+
       '<a class="view" href="review.html?id='+encodeURIComponent(r.effectId)+'" target="_blank">View page ↗</a>'+
     '</div></div>';
 }
