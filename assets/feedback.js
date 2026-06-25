@@ -33,9 +33,15 @@ export async function listFeedback(effectId) {
 
 // ponytail: reads the whole collection once for badge counts; swap to a
 // per-effect counter doc if the collection ever gets large.
+// { effectId: { total, accepted } } — accepted = feedback the owner marked 'accepted'
 export async function allCounts() {
   const snap = await getDocs(col);
   const counts = {};
-  snap.forEach(d => { const id = d.data().effectId; if (id) counts[id] = (counts[id] || 0) + 1; });
+  snap.forEach(d => {
+    const data = d.data(); const id = data.effectId; if (!id) return;
+    const c = counts[id] || (counts[id] = { total: 0, accepted: 0 });
+    c.total++;
+    if (data.status === 'accepted') c.accepted++;
+  });
   return counts;
 }
