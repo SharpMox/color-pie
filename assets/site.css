@@ -97,3 +97,18 @@ a:hover { text-decoration: underline; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; }
 }
+
+/* ============== Footer ============== */
+/* In-flow page footer (not fixed) — sits at the end of each page's <main class="wrap">,
+   so it scrolls with the body and inherits the content column's width + gutters. */
+.site-footer {
+  margin-top: 32px;
+  padding: 20px 0 8px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  color: var(--text-soft);
+  font-size: 12px;
+  line-height: 1.7;
+}
+.site-footer p { margin: 0; }
+.site-footer .ff-credit { margin-top: 10px; }
