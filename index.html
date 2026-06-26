@@ -4,6 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Color Pie Explorer — Effects by Color</title>
+<meta name="description" content="Browse Magic: The Gathering's color pie — effects organized by color and tier (primary, secondary, tertiary) with example cards, filters, and search."/>
 <link rel="stylesheet" href="assets/site.css"/>
 <style>
 /* ===== Layout ===== */
@@ -118,7 +119,7 @@ dialog.detail::backdrop { background: rgba(0,0,0,.5); }
 .detail-head .tag { margin-top: 4px; }
 .detail-head .rationale { margin: 10px 0 0; color: var(--text); }
 .detail-head .detail-meta { margin: 10px 0 0; }
-#d-type, .detail-meta .tag { font-size: 14px; color: rgba(255,255,255,.75); }
+#d-type, .detail-meta .tag { font-size: 14px; color: var(--text-soft); }
 .detail-close { width: 38px; height: 38px; flex: none; border: 1px solid var(--border); border-radius: 9px; background: var(--surface-2); color: var(--text); font-size: 18px; cursor: pointer; }
 .detail-body { padding: 14px 16px 20px; }
 .detail-body .rationale { margin: 0 0 14px; color: var(--text); }
@@ -132,8 +133,8 @@ dialog.detail::backdrop { background: rgba(0,0,0,.5); }
 .tier-tertiary { background: var(--tier-tertiary); color: #14171c; }
 .tier-off { background: transparent; color: var(--text-soft); border: 1px dashed var(--border); }
 .art-strip { display: flex; flex-wrap: wrap; gap: 12px; }
-fieldset.art { border: 1px solid rgba(255,255,255,.4); border-radius: 10px; margin: 0; padding: 8px; width: auto; text-align: center; }
-fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: #fff; }
+fieldset.art { border: 1px solid var(--border); border-radius: 10px; margin: 0; padding: 8px; width: auto; text-align: center; }
+fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--text-soft); }
 fieldset.art.bendbreak { border-color: var(--c-R); }
 fieldset.art.bendbreak > legend { color: var(--c-R); }
 .art img { width: 182px; max-width: 100%; border-radius: 9px; display: block; background: var(--surface-2); aspect-ratio: 488/680; object-fit: cover; cursor: zoom-in; }
@@ -166,6 +167,29 @@ fieldset.art.bendbreak > legend { color: var(--c-R); }
   .pickrow .picker { flex: 1 1 100%; gap: 4px; }
   .pick { flex: 1 1 0; min-width: 0; padding: 0 4px; gap: 3px; font-size: 13px; }
   .search { flex: 1 1 100%; }
+
+  /* ----- Detail modal: full-screen on phones; title on its own full-width row below the
+     buttons; only the button+title header stays sticky (rationale, meta, body scroll);
+     smaller fonts ----- */
+  dialog.detail { width: 100%; max-width: none; height: 100%; max-height: 100%; margin: 0; border-radius: 0; }
+  /* display:contents promotes the head-row to a direct child of the scrolling dialog, so
+     its sticky pin holds for the whole scroll (a sticky child only pins while its parent
+     is in view — a short .detail-head parent would let it scroll away). */
+  .detail-head { display: contents; }
+  .detail-head-row {
+    position: sticky; top: 0; z-index: 2;
+    flex-wrap: wrap; gap: 6px 8px;
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 12px 14px;
+  }
+  .detail-head-row > div { order: 2; flex: 1 1 100%; }   /* title block drops below; Review's margin-left:auto keeps Review + × grouped top-right */
+  .detail-head .rationale { padding: 12px 14px 0; margin: 0; font-size: 14px; }   /* now outside the sticky header → scrolls */
+  .detail-head .detail-meta { padding: 0 14px; margin: 10px 0 16px; }
+  .detail-head h2 { font-size: 16px; }
+  #d-type, .detail-meta .tag { font-size: 13px; }
+  #d-type { display: inline-block; margin: 12px 0 0 14px; }   /* moved out of the sticky header → scrolls under the title */
+  .detail-body { padding: 12px 14px 18px; }
+  .detail-body .color-sec h3 { font-size: 13px; }
 }
 </style>
 </head>
@@ -223,6 +247,9 @@ fieldset.art.bendbreak > legend { color: var(--c-R); }
     <span class="th-tier"><span class="full">Tertiary</span><span class="abbr">T</span></span>
   </div>
   <div class="list" id="list"></div>
+  <footer class="site-footer">
+    <p class="ff-credit">By<br/><span class="ff-names">Sharpmax · Bookwyrm · Xavion</span></p>
+  </footer>
 </main>
 
 <dialog class="detail" id="detail">
@@ -299,6 +326,14 @@ fieldset.art.bendbreak > legend { color: var(--c-R); }
     if (filt.baseKeyword.size && !filt.baseKeyword.has(e.baseKeyword)) return false;
     return true;
   }
+  // A group "name-matches" the query when it hits the base label or a shown variant's
+  // title (NOT its rationale/category/card names). No query → always true (single bucket,
+  // natural order preserved). Used to float name matches above card/rationale-only hits.
+  function nameHit(g, rows) {
+    if (!query) return true;
+    if (g.base.toLowerCase().indexOf(query) !== -1) return true;
+    return rows.some(function (m) { return m.title.toLowerCase().indexOf(query) !== -1; });
+  }
   // Color filter (never sorts): no filter when all/none selected; else keep effects whose
   // pie includes a selected color (at the chosen tier, or any tier when tier === 'all').
   function passesColor(g) {
@@ -359,7 +394,10 @@ fieldset.art.bendbreak > legend { color: var(--c-R); }
       tierCells(be) + '</summary>' + inner + '</details>' : inner;
   }
   function render() {
-    var resHtml = '', outHtml = '', shown = 0, dimmed = 0;
+    // Each section splits into a name-match bucket (top) and the rest; GROUPS is walked
+    // in natural order so each bucket stays stably ordered. No query → all rows land in
+    // *Top, so output matches the natural-order list exactly.
+    var resTop = '', resRest = '', outTop = '', outRest = '', shown = 0, dimmed = 0;
     // groups collapse by default; any active filter/search auto-opens matching groups
     // any row-level filter can match a subset of a group's variants; auto-open so
     // matches aren't hidden inside a collapsed <details> (tier/colour are group-level)
@@ -371,9 +409,10 @@ fieldset.art.bendbreak > legend { color: var(--c-R); }
       var colorOk = passesColor(g);
       var res = colorOk ? members.filter(passesRow) : [];
       var out = members.filter(function (m) { return res.indexOf(m) === -1; });
-      if (res.length) { resHtml += groupWrap(g, isGroup, res, filtering); shown += res.length; }
-      if (out.length) { outHtml += groupWrap(g, isGroup, out, false); dimmed += out.length; }
+      if (res.length) { var rh = groupWrap(g, isGroup, res, filtering); if (nameHit(g, res)) resTop += rh; else resRest += rh; shown += res.length; }
+      if (out.length) { var oh = groupWrap(g, isGroup, out, false); if (nameHit(g, out)) outTop += oh; else outRest += oh; dimmed += out.length; }
     });
+    var resHtml = resTop + resRest, outHtml = outTop + outRest;
     var html = resHtml || '<p class="empty">' +
       (selected.size ? 'No effects match these filters.' : 'Pick one or more colors to see effects.') + '</p>';
     if (outHtml) html += '<div class="group-head fo-label">Filtered out</div>' +
@@ -415,8 +454,15 @@ fieldset.art.bendbreak > legend { color: var(--c-R); }
   function openDetail(i) {
     var eff = COLORPIE[i];
     document.getElementById('d-title').textContent = eff.title;
-    document.getElementById('d-type').textContent = eff.type + (eff.category ? ' · ' + eff.category : '');
+    var typeEl = document.getElementById('d-type');
+    typeEl.textContent = eff.type + (eff.category ? ' · ' + eff.category : '');
     document.getElementById('d-rationale').textContent = eff.rationale || '';
+    // On mobile the type tag scrolls in the body (under the title); on desktop it stays in
+    // the sticky header under the title. Relocate per viewport at open time.
+    if (window.matchMedia('(max-width: 560px)').matches)
+      document.getElementById('d-rationale').before(typeEl);   // into the scroll flow, above the rationale
+    else
+      document.getElementById('d-title').after(typeEl);        // back inside the title block
     document.getElementById('d-meta').innerHTML = [['Interaction', eff.interaction], ['Duration', eff.duration], ['Base keyword', eff.baseKeyword]]
       .filter(function (m) { return m[1]; })
       .map(function (m) { return '<span class="tag">' + m[0] + ': ' + esc(m[1]) + '</span>'; }).join('');
@@ -539,7 +585,7 @@ fieldset.art.bendbreak > legend { color: var(--c-R); }
   var siteHeader = document.querySelector('.site-header');
   var listHead = document.getElementById('list-head');
   function setStickyTop() { if (siteHeader && listHead) listHead.style.top = siteHeader.offsetHeight + 'px'; }
-  setStickyTop();
+  requestAnimationFrame(setStickyTop);   // defer the offsetHeight read off the init layout pass (avoids a forced reflow)
   window.addEventListener('resize', setStickyTop);
 
   render();
@@ -553,6 +599,14 @@ fieldset.art.bendbreak > legend { color: var(--c-R); }
     selected = new Set();
     console.assert(!passesColor({ members: [{ rank: {} }] }), 'no colors dims all');
     selected = save;
+    var qsave = query;                    // restore after — don't desync the search box
+    query = 'viper';
+    console.assert(nameHit({ base: 'Viperweave' }, []), 'base name-match floats up');
+    console.assert(nameHit({ base: 'Deathtouch' }, [{ title: 'Ambush Viper — Has' }]), 'variant title name-match floats up');
+    console.assert(!nameHit({ base: 'Deathtouch' }, [{ title: 'Deathtouch — Has' }]), 'card/rationale-only match stays in the rest bucket');
+    query = '';
+    console.assert(nameHit({ base: 'Anything' }, []), 'no query → single bucket');
+    query = qsave;
   })();
 })();
 </script>

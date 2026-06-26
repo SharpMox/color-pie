@@ -1,0 +1,76 @@
+# Orphaned Example Card pages (no longer referenced by any effect)
+
+72 pages. Safe to delete in Notion (multi-select in the Example Cards table -> Delete).
+
+- [ ] Auramancer — https://app.notion.com/p/385f1559c99b81c682c4e71d169397f7
+- [ ] Aurelia's Fury — https://app.notion.com/p/385f1559c99b815484b0f6037f12c765
+- [ ] Avacyn, Angel of Hope — https://app.notion.com/p/385f1559c99b8158876bf1333bf6f723
+- [ ] Baneslayer Angel — https://app.notion.com/p/385f1559c99b8193a97af8fde3927204
+- [ ] Banisher Priest — https://app.notion.com/p/385f1559c99b81e9aef5c243cc1ace26
+- [ ] Banshee of the Dread Choir — https://app.notion.com/p/385f1559c99b818cac74f71a6292c870
+- [ ] Brute Strength — https://app.notion.com/p/385f1559c99b816292aee50b51b34888
+- [ ] Constant Mists — https://app.notion.com/p/385f1559c99b81d5971ad0205f1ab262
+- [ ] Cranial Extraction — https://app.notion.com/p/385f1559c99b81a1b55dc6325e2ef03e
+- [ ] Curse of the Nightly Hunt — https://app.notion.com/p/385f1559c99b811294a7ee0050809483
+- [ ] Deadly Recluse — https://app.notion.com/p/385f1559c99b81e382b2dce8daf4ffa6
+- [ ] Divination — https://app.notion.com/p/385f1559c99b8162ab2dced622049817
+- [ ] Door to Nothingness — https://app.notion.com/p/385f1559c99b819eab74dfc5ae49b08d
+- [ ] Ethereal Armor — https://app.notion.com/p/385f1559c99b81acbd78e167b3d90886
+- [ ] Fabled Hero — https://app.notion.com/p/385f1559c99b815ca952e4f027ede5b7
+- [ ] Fervor — https://app.notion.com/p/385f1559c99b8145a511e1b8101d7415
+- [ ] Fireblade Charger — https://app.notion.com/p/385f1559c99b816fba63e3fde48ec5d5
+- [ ] Flickerwisp — https://app.notion.com/p/385f1559c99b8125afe5ed8f79ef6697
+- [ ] Frost Breath — https://app.notion.com/p/385f1559c99b81e2b25dc7c0975df7d6
+- [ ] Frost Titan — https://app.notion.com/p/385f1559c99b81e5bd36dece6ffe76e0
+- [ ] Frozen Shade — https://app.notion.com/p/385f1559c99b8141b055c557a0a22f40
+- [ ] Giant Spider — https://app.notion.com/p/385f1559c99b818c9da2fcd6e24db0e8
+- [ ] Goblin Bushwhacker — https://app.notion.com/p/385f1559c99b8189ae92e1c72864701d
+- [ ] Goblin War Drums — https://app.notion.com/p/385f1559c99b81cc9bcae0c7950715cf
+- [ ] Gray Merchant of Asphodel — https://app.notion.com/p/385f1559c99b814083a6cb1e76ba0e22
+- [ ] Hedron Crab — https://app.notion.com/p/385f1559c99b81d4b753d48ff8050bb3
+- [ ] Huntmaster of the Fells — https://app.notion.com/p/385f1559c99b81fc84e9ec354eebe030
+- [ ] Invisible Stalker — https://app.notion.com/p/385f1559c99b81819fe4f485705ffd70
+- [ ] Invoke the Winds — https://app.notion.com/p/385f1559c99b815caa8ac76d2e5f76c1
+- [ ] Krenko, Mob Boss — https://app.notion.com/p/385f1559c99b815988a9ccab982966c2
+- [ ] Languish — https://app.notion.com/p/385f1559c99b8144b78fe224c56a9496
+- [ ] Last Gasp — https://app.notion.com/p/385f1559c99b817da9dbf1a55de02236
+- [ ] Light Up the Stage — https://app.notion.com/p/385f1559c99b810e941dc43cf756cf73
+- [ ] Living Lands — https://app.notion.com/p/385f1559c99b8176994dfa3bacedecf4
+- [ ] Lord of the Pit — https://app.notion.com/p/385f1559c99b8167830bd2959230c106
+- [ ] Madcap Skills — https://app.notion.com/p/385f1559c99b81c9828ce3cda7aae0a6
+- [ ] Marshal's Anthem — https://app.notion.com/p/385f1559c99b81d9805dfd4e86e92a67
+- [ ] Meddling Mage — https://app.notion.com/p/385f1559c99b81fea213f39c574b6432
+- [ ] Midnight Reaper — https://app.notion.com/p/385f1559c99b81b7b72dfff22abd812e
+- [ ] Mystic Retrieval — https://app.notion.com/p/385f1559c99b81feb871c052d407de43
+- [ ] Opposition — https://app.notion.com/p/385f1559c99b8120a22ac516aee8a21d
+- [ ] Pelakka Wurm — https://app.notion.com/p/385f1559c99b81d98b41e2900e4665d1
+- [ ] Phantasmal Image — https://app.notion.com/p/385f1559c99b818eab63d76168d77ce7
+- [ ] Primeval Titan — https://app.notion.com/p/385f1559c99b8175a830eedd1037a598
+- [ ] Reckless Charge — https://app.notion.com/p/385f1559c99b8184bb77e4d0eefe4fcd
+- [ ] Restock — https://app.notion.com/p/385f1559c99b8196a8eaf9bfcfd33b14
+- [ ] Rootwalla — https://app.notion.com/p/385f1559c99b81389f3ddd6af4fcc2fa
+- [ ] Sakashima the Impostor — https://app.notion.com/p/385f1559c99b8129b0dae361ecffb5a1
+- [ ] Sengir Vampire — https://app.notion.com/p/385f1559c99b81ecb14ad46ac0f77f42
+- [ ] Serra Angel — https://app.notion.com/p/385f1559c99b81f0818cd0b51242bda8
+- [ ] Slaughter the Strong — https://app.notion.com/p/385f1559c99b81f4801fe13342c75dfb
+- [ ] Smite the Monstrous — https://app.notion.com/p/385f1559c99b817ba312f9572b21b776
+- [ ] Snakeskin Veil — https://app.notion.com/p/385f1559c99b815db7c8e2ede9f61458
+- [ ] Soul Warden — https://app.notion.com/p/385f1559c99b81d2ac14eb75d0808aeb
+- [ ] Spidersilk Armor — https://app.notion.com/p/385f1559c99b81ed8335c5a9060d2e98
+- [ ] Spidery Grasp — https://app.notion.com/p/385f1559c99b81358f45e0010b30cfac
+- [ ] Spreading Seas — https://app.notion.com/p/385f1559c99b814fae0cea7b8ba1f7d2
+- [ ] Sun Titan — https://app.notion.com/p/385f1559c99b81f381c8f9c2b00bf0e0
+- [ ] Tezzeret the Seeker — https://app.notion.com/p/385f1559c99b8101a11bc8d9b0c84459
+- [ ] Thorn Elemental — https://app.notion.com/p/385f1559c99b81c992b5f0838a52a78a
+- [ ] Time Warp — https://app.notion.com/p/385f1559c99b8121a891c9adecf539cf
+- [ ] Tragic Slip — https://app.notion.com/p/385f1559c99b8178aae3fab8ab4740a2
+- [ ] Trash for Treasure — https://app.notion.com/p/385f1559c99b81f5aed6c62c36b22d78
+- [ ] Trumpet Blast — https://app.notion.com/p/385f1559c99b81078470c32efcf9a5a8
+- [ ] Unholy Strength — https://app.notion.com/p/385f1559c99b8195bf2cddfa4c6ebf9f
+- [ ] Vampire Hexmage — https://app.notion.com/p/385f1559c99b81e39777f25a3b7366b4
+- [ ] Vampiric Tutor — https://app.notion.com/p/385f1559c99b8155b462ed5288f80930
+- [ ] Vengeance — https://app.notion.com/p/385f1559c99b816081bcc3c451822bb3
+- [ ] Verduran Enchantress — https://app.notion.com/p/385f1559c99b8128aef2fce40fa1a5d7
+- [ ] Wall of Omens — https://app.notion.com/p/385f1559c99b81c6ba63f13b1f5cebb6
+- [ ] Wall of Roots — https://app.notion.com/p/385f1559c99b8134ba7fec6ec7144cca
+- [ ] White Knight — https://app.notion.com/p/385f1559c99b81f79e3cd23c6440478d

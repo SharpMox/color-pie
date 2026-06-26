@@ -1,0 +1,42 @@
+name: Refresh site data from Notion
+
+on: workflow_dispatch
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Fetch from Notion and rebuild data
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+        run: |
+          node scripts/fetch-notion.js
+          node scripts/build-data.js --check
+
+      - name: Open PR if data changed
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if git diff --quiet -- data/colorpie.js; then
+            echo "No data change — nothing to do."; exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -B chore/data-refresh
+          git add data/colorpie.js
+          git commit -m "chore(data): refresh colorpie.js from Notion"
+          git push --force origin chore/data-refresh
+          if [ -z "$(gh pr list --head chore/data-refresh --state open --json number -q '.[0].number')" ]; then
+            gh pr create --base main --head chore/data-refresh \
+              --title "chore(data): refresh colorpie.js from Notion" \
+              --body "Automated refresh from Notion via the refresh-data workflow. Review the diff, then merge to deploy."
+          fi
