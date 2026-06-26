@@ -184,6 +184,7 @@ fieldset.art.bendbreak > legend { color: var(--c-R); }
   .detail-head .detail-meta { padding: 0 14px; margin: 10px 0 16px; }
   .detail-head h2 { font-size: 16px; }
   #d-type, .detail-meta .tag { font-size: 13px; }
+  #d-type { display: inline-block; margin: 12px 0 0 14px; }   /* moved out of the sticky header → scrolls under the title */
   .detail-body { padding: 12px 14px 18px; }
   .detail-body .color-sec h3 { font-size: 13px; }
 }
@@ -447,8 +448,15 @@ fieldset.art.bendbreak > legend { color: var(--c-R); }
   function openDetail(i) {
     var eff = COLORPIE[i];
     document.getElementById('d-title').textContent = eff.title;
-    document.getElementById('d-type').textContent = eff.type + (eff.category ? ' · ' + eff.category : '');
+    var typeEl = document.getElementById('d-type');
+    typeEl.textContent = eff.type + (eff.category ? ' · ' + eff.category : '');
     document.getElementById('d-rationale').textContent = eff.rationale || '';
+    // On mobile the type tag scrolls in the body (under the title); on desktop it stays in
+    // the sticky header under the title. Relocate per viewport at open time.
+    if (window.matchMedia('(max-width: 560px)').matches)
+      document.getElementById('d-rationale').before(typeEl);   // into the scroll flow, above the rationale
+    else
+      document.getElementById('d-title').after(typeEl);        // back inside the title block
     document.getElementById('d-meta').innerHTML = [['Interaction', eff.interaction], ['Duration', eff.duration], ['Base keyword', eff.baseKeyword]]
       .filter(function (m) { return m[1]; })
       .map(function (m) { return '<span class="tag">' + m[0] + ': ' + esc(m[1]) + '</span>'; }).join('');
