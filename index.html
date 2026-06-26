@@ -299,6 +299,14 @@ fieldset.art.bendbreak > legend { color: var(--c-R); }
     if (filt.baseKeyword.size && !filt.baseKeyword.has(e.baseKeyword)) return false;
     return true;
   }
+  // A group "name-matches" the query when it hits the base label or a shown variant's
+  // title (NOT its rationale/category/card names). No query → always true (single bucket,
+  // natural order preserved). Used to float name matches above card/rationale-only hits.
+  function nameHit(g, rows) {
+    if (!query) return true;
+    if (g.base.toLowerCase().indexOf(query) !== -1) return true;
+    return rows.some(function (m) { return m.title.toLowerCase().indexOf(query) !== -1; });
+  }
   // Color filter (never sorts): no filter when all/none selected; else keep effects whose
   // pie includes a selected color (at the chosen tier, or any tier when tier === 'all').
   function passesColor(g) {
@@ -359,7 +367,10 @@ fieldset.art.bendbreak > legend { color: var(--c-R); }
       tierCells(be) + '</summary>' + inner + '</details>' : inner;
   }
   function render() {
-    var resHtml = '', outHtml = '', shown = 0, dimmed = 0;
+    // Each section splits into a name-match bucket (top) and the rest; GROUPS is walked
+    // in natural order so each bucket stays stably ordered. No query → all rows land in
+    // *Top, so output matches the natural-order list exactly.
+    var resTop = '', resRest = '', outTop = '', outRest = '', shown = 0, dimmed = 0;
     // groups collapse by default; any active filter/search auto-opens matching groups
     // any row-level filter can match a subset of a group's variants; auto-open so
     // matches aren't hidden inside a collapsed <details> (tier/colour are group-level)
@@ -371,9 +382,10 @@ fieldset.art.bendbreak > legend { color: var(--c-R); }
       var colorOk = passesColor(g);
       var res = colorOk ? members.filter(passesRow) : [];
       var out = members.filter(function (m) { return res.indexOf(m) === -1; });
-      if (res.length) { resHtml += groupWrap(g, isGroup, res, filtering); shown += res.length; }
-      if (out.length) { outHtml += groupWrap(g, isGroup, out, false); dimmed += out.length; }
+      if (res.length) { var rh = groupWrap(g, isGroup, res, filtering); if (nameHit(g, res)) resTop += rh; else resRest += rh; shown += res.length; }
+      if (out.length) { var oh = groupWrap(g, isGroup, out, false); if (nameHit(g, out)) outTop += oh; else outRest += oh; dimmed += out.length; }
     });
+    var resHtml = resTop + resRest, outHtml = outTop + outRest;
     var html = resHtml || '<p class="empty">' +
       (selected.size ? 'No effects match these filters.' : 'Pick one or more colors to see effects.') + '</p>';
     if (outHtml) html += '<div class="group-head fo-label">Filtered out</div>' +
@@ -553,6 +565,14 @@ fieldset.art.bendbreak > legend { color: var(--c-R); }
     selected = new Set();
     console.assert(!passesColor({ members: [{ rank: {} }] }), 'no colors dims all');
     selected = save;
+    var qsave = query;                    // restore after — don't desync the search box
+    query = 'viper';
+    console.assert(nameHit({ base: 'Viperweave' }, []), 'base name-match floats up');
+    console.assert(nameHit({ base: 'Deathtouch' }, [{ title: 'Ambush Viper — Has' }]), 'variant title name-match floats up');
+    console.assert(!nameHit({ base: 'Deathtouch' }, [{ title: 'Deathtouch — Has' }]), 'card/rationale-only match stays in the rest bucket');
+    query = '';
+    console.assert(nameHit({ base: 'Anything' }, []), 'no query → single bucket');
+    query = qsave;
   })();
 })();
 </script>
