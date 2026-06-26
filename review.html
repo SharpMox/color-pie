@@ -6,8 +6,10 @@
 <title>Review Effect — Color Pie</title>
 <link rel="stylesheet" href="assets/site.css"/>
 <style>
-.wrap { max-width: 1400px; margin: 0 auto; padding: 14px 0 210px; }  /* wide enough for all 6 color columns; bottom pad clears the sticky form footer */
-.site-header-inner { flex-wrap: wrap; max-width: 1400px; padding-left: 0; padding-right: 0; }
+/* max-width is 1400 + 2×16 gutter: content still caps at 1400 on large screens (so >1400
+   is unchanged) while 16px gutters appear in the 861–1400 band instead of hugging the edges. */
+.wrap { max-width: 1432px; margin: 0 auto; padding: 14px 16px 210px; }  /* wide enough for all 6 color columns; bottom pad clears the sticky form footer */
+.site-header-inner { flex-wrap: wrap; max-width: 1432px; padding-left: 16px; padding-right: 16px; }
 .site-title a { color: inherit; text-decoration: none; }
 .site-title a:hover { color: var(--accent); }
 .hdr-btn { min-height: 34px; padding: 0 12px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface-2); color: var(--text); font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; }
