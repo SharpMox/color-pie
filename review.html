@@ -69,7 +69,7 @@ hr.sep { border: 0; border-top: 1px solid var(--border); margin: 18px 0; }
 /* ===== Mobile (≤860px): the sticky footer collapses to a FAB that opens the form as a
    full-screen scrollable modal. Desktop (≥861px) is untouched. ===== */
 @media (max-width: 860px) {
-  .wrap { padding: 14px 12px 40px; }            /* add side padding; no sticky footer to clear */
+  .wrap { padding: 14px 12px 80px; }            /* side padding; bottom clears the floating Review FAB so it doesn't cover the footer */
   .fb-footer { display: none; }                 /* hidden until the FAB opens it */
   .fb-footer.fb-open {
     display: block; inset: 0; top: auto; height: auto; max-height: 88vh; overflow-y: auto;
@@ -142,6 +142,9 @@ hr.sep { border: 0; border-top: 1px solid var(--border); margin: 18px 0; }
 
 <main class="wrap">
   <div id="effect"></div>
+  <footer class="site-footer">
+    <p class="ff-credit">By<br/><span class="ff-names">Sharpmax · Bookwyrm · Xavion</span></p>
+  </footer>
 </main>
 
 <footer class="fb-footer" id="fb-footer">
