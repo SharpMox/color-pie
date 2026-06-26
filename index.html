@@ -166,6 +166,29 @@ fieldset.art.bendbreak > legend { color: var(--c-R); }
   .pickrow .picker { flex: 1 1 100%; gap: 4px; }
   .pick { flex: 1 1 0; min-width: 0; padding: 0 4px; gap: 3px; font-size: 13px; }
   .search { flex: 1 1 100%; }
+
+  /* ----- Detail modal: full-screen on phones; title on its own full-width row below the
+     buttons; only the button+title header stays sticky (rationale, meta, body scroll);
+     smaller fonts ----- */
+  dialog.detail { width: 100%; max-width: none; height: 100%; max-height: 100%; margin: 0; border-radius: 0; }
+  /* display:contents promotes the head-row to a direct child of the scrolling dialog, so
+     its sticky pin holds for the whole scroll (a sticky child only pins while its parent
+     is in view — a short .detail-head parent would let it scroll away). */
+  .detail-head { display: contents; }
+  .detail-head-row {
+    position: sticky; top: 0; z-index: 2;
+    flex-wrap: wrap; gap: 6px 8px;
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 12px 14px;
+  }
+  .detail-head-row > div { order: 2; flex: 1 1 100%; }   /* title block drops below; Review's margin-left:auto keeps Review + × grouped top-right */
+  .detail-head .rationale { padding: 12px 14px 0; margin: 0; font-size: 14px; }   /* now outside the sticky header → scrolls */
+  .detail-head .detail-meta { padding: 0 14px; margin: 10px 0 16px; }
+  .detail-head h2 { font-size: 16px; }
+  #d-type, .detail-meta .tag { font-size: 13px; }
+  #d-type { display: inline-block; margin: 12px 0 0 14px; }   /* moved out of the sticky header → scrolls under the title */
+  .detail-body { padding: 12px 14px 18px; }
+  .detail-body .color-sec h3 { font-size: 13px; }
 }
 </style>
 </head>
@@ -427,8 +450,15 @@ fieldset.art.bendbreak > legend { color: var(--c-R); }
   function openDetail(i) {
     var eff = COLORPIE[i];
     document.getElementById('d-title').textContent = eff.title;
-    document.getElementById('d-type').textContent = eff.type + (eff.category ? ' · ' + eff.category : '');
+    var typeEl = document.getElementById('d-type');
+    typeEl.textContent = eff.type + (eff.category ? ' · ' + eff.category : '');
     document.getElementById('d-rationale').textContent = eff.rationale || '';
+    // On mobile the type tag scrolls in the body (under the title); on desktop it stays in
+    // the sticky header under the title. Relocate per viewport at open time.
+    if (window.matchMedia('(max-width: 560px)').matches)
+      document.getElementById('d-rationale').before(typeEl);   // into the scroll flow, above the rationale
+    else
+      document.getElementById('d-title').after(typeEl);        // back inside the title block
     document.getElementById('d-meta').innerHTML = [['Interaction', eff.interaction], ['Duration', eff.duration], ['Base keyword', eff.baseKeyword]]
       .filter(function (m) { return m[1]; })
       .map(function (m) { return '<span class="tag">' + m[0] + ': ' + esc(m[1]) + '</span>'; }).join('');
