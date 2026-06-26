@@ -82,6 +82,23 @@ hr.sep { border: 0; border-top: 1px solid var(--border); margin: 18px 0; }
   .fb-fab { display: inline-flex; align-items: center; gap: 6px; position: fixed; right: 16px; bottom: 16px; z-index: 64; min-height: 48px; padding: 0 18px; border: 0; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font-size: 15px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,.28); }
   .fb-footer.fb-open ~ .fb-fab { display: none; }   /* hide FAB while form modal is open */
   .fb-fab[hidden] { display: none; }                /* effect-not-found: keep FAB hidden */
+
+  /* Header: add side padding (desktop intentionally has none) and split into two rows.
+     Row 1 = title (grows) + theme toggle pinned right; a full-width ::after flex-break
+     forces Row 2 = Prev/Next/Feedback, left-aligned. */
+  .site-header-inner { padding-left: 12px; padding-right: 12px; row-gap: 8px; }
+  .site-title { order: 1; flex: 1 1 auto; }         /* grows → pushes the theme toggle to the right of row 1 */
+  .theme-toggle { order: 2; }
+  .site-header-inner::after { content: ''; order: 3; flex-basis: 100%; height: 0; }  /* line break before the buttons */
+  #prev { order: 4; } #next { order: 5; }
+  .hdr-btn.fb-toggle { order: 6; margin-left: 0; }  /* drop the auto so it left-aligns under the title */
+
+  /* Content: stack the colour sections vertically (full width), and lay their card
+     previews out two-across instead of a single tall column. */
+  .colors-row { flex-direction: column; overflow-x: visible; gap: 12px; }
+  .color-sec { width: auto; }                       /* stretch to full width */
+  .art-strip { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .art img { width: 100%; }                          /* fill the grid cell */
 }
 
 /* ===== Feedback drawer ===== */
