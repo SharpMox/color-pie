@@ -166,6 +166,26 @@ fieldset.art.bendbreak > legend { color: var(--c-R); }
   .pickrow .picker { flex: 1 1 100%; gap: 4px; }
   .pick { flex: 1 1 0; min-width: 0; padding: 0 4px; gap: 3px; font-size: 13px; }
   .search { flex: 1 1 100%; }
+
+  /* ----- Detail modal: title on its own full-width row below the buttons; only the
+     button+title header stays sticky (rationale, meta, body scroll); smaller fonts ----- */
+  /* display:contents promotes the head-row to a direct child of the scrolling dialog, so
+     its sticky pin holds for the whole scroll (a sticky child only pins while its parent
+     is in view — a short .detail-head parent would let it scroll away). */
+  .detail-head { display: contents; }
+  .detail-head-row {
+    position: sticky; top: 0; z-index: 2;
+    flex-wrap: wrap; gap: 6px 8px;
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 12px 14px;
+  }
+  .detail-head-row > div { order: 2; flex: 1 1 100%; }   /* title block drops below; Review's margin-left:auto keeps Review + × grouped top-right */
+  .detail-head .rationale { padding: 12px 14px 0; margin: 0; font-size: 14px; }   /* now outside the sticky header → scrolls */
+  .detail-head .detail-meta { padding: 0 14px; margin: 10px 0 16px; }
+  .detail-head h2 { font-size: 16px; }
+  #d-type, .detail-meta .tag { font-size: 13px; }
+  .detail-body { padding: 12px 14px 18px; }
+  .detail-body .color-sec h3 { font-size: 13px; }
 }
 </style>
 </head>
