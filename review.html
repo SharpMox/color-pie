@@ -6,8 +6,10 @@
 <title>Review Effect — Color Pie</title>
 <link rel="stylesheet" href="assets/site.css"/>
 <style>
-.wrap { max-width: 1400px; margin: 0 auto; padding: 14px 0 210px; }  /* wide enough for all 6 color columns; bottom pad clears the sticky form footer */
-.site-header-inner { flex-wrap: wrap; max-width: 1400px; padding-left: 0; padding-right: 0; }
+/* max-width is 1400 + 2×16 gutter: content still caps at 1400 on large screens (so >1400
+   is unchanged) while 16px gutters appear in the 861–1400 band instead of hugging the edges. */
+.wrap { max-width: 1432px; margin: 0 auto; padding: 14px 16px 210px; }  /* wide enough for all 6 color columns; bottom pad clears the sticky form footer */
+.site-header-inner { flex-wrap: wrap; max-width: 1432px; padding-left: 16px; padding-right: 16px; }
 .site-title a { color: inherit; text-decoration: none; }
 .site-title a:hover { color: var(--accent); }
 .hdr-btn { min-height: 34px; padding: 0 12px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface-2); color: var(--text); font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; }
@@ -37,8 +39,8 @@ h2.eff-title { margin: 0 0 4px; font-size: 20px; }
 .tier-tertiary { background: var(--tier-tertiary); color: #14171c; }
 .tier-off { background: transparent; color: var(--text-soft); border: 1px dashed var(--border); }
 .art-strip { display: flex; flex-direction: column; gap: 8px; }
-fieldset.art { border: 1px solid rgba(255,255,255,.4); border-radius: 8px; margin: 0; padding: 6px; width: auto; text-align: center; }
-fieldset.art > legend { margin: 0 auto; padding: 0 6px; font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #fff; }
+fieldset.art { border: 1px solid var(--border); border-radius: 8px; margin: 0; padding: 6px; width: auto; text-align: center; }
+fieldset.art > legend { margin: 0 auto; padding: 0 6px; font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-soft); }
 fieldset.art.bendbreak { border-color: var(--c-R); }
 fieldset.art.bendbreak > legend { color: var(--c-R); }
 .art img { width: 182px; max-width: 100%; border-radius: 7px; display: block; background: var(--surface-2); aspect-ratio: 488/680; object-fit: cover; cursor: zoom-in; }
@@ -59,7 +61,47 @@ hr.sep { border: 0; border-top: 1px solid var(--border); margin: 18px 0; }
 .btn-primary { flex: 0 0 auto; align-self: flex-start; min-height: 44px; padding: 0 22px; border: 0; border-radius: 10px; background: var(--accent); color: var(--accent-ink); font-size: 14px; font-weight: 700; cursor: pointer; }
 .btn-primary:disabled { opacity: .5; cursor: default; }
 .fb-msg { position: absolute; top: 8px; right: 16px; margin: 0; font-size: 12px; color: var(--text-soft); background: var(--surface); padding: 2px 8px; border-radius: 6px; }
-@media (max-width: 860px) { .fb-footer { max-height: 74vh; overflow-y: auto; } .field, .field.name-field { flex: 1 1 45%; } }
+
+/* Mobile-only affordances (FAB + modal close + backdrop): hidden on desktop, where the
+   sticky footer stays exactly as-is. */
+.fb-fab, .fb-close, .fb-modal-bg { display: none; }
+
+/* ===== Mobile (≤860px): the sticky footer collapses to a FAB that opens the form as a
+   full-screen scrollable modal. Desktop (≥861px) is untouched. ===== */
+@media (max-width: 860px) {
+  .wrap { padding: 14px 12px 40px; }            /* add side padding; no sticky footer to clear */
+  .fb-footer { display: none; }                 /* hidden until the FAB opens it */
+  .fb-footer.fb-open {
+    display: block; inset: 0; top: auto; height: auto; max-height: 88vh; overflow-y: auto;
+    border-radius: 16px 16px 0 0;               /* bottom sheet */
+  }
+  .fb-footer.fb-open .fb-form { padding: 16px 16px 20px; }
+  .fb-footer.fb-open .field, .fb-footer.fb-open .field.name-field { flex: 1 1 100%; }
+  .fb-footer.fb-open .name-field .btn-primary { margin-top: 10px; }
+  .fb-footer.fb-open .fb-msg { top: auto; bottom: 10px; right: 16px; }   /* clear of the × */
+  .fb-close { display: inline-flex; align-items: center; justify-content: center; position: absolute; top: 8px; right: 10px; z-index: 1; width: 36px; height: 36px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface-2); color: var(--text); font-size: 20px; cursor: pointer; }
+  .fb-modal-bg.open { display: block; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 65; }
+  .fb-fab { display: inline-flex; align-items: center; gap: 6px; position: fixed; right: 16px; bottom: 16px; z-index: 64; min-height: 48px; padding: 0 18px; border: 0; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font-size: 15px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,.28); }
+  .fb-footer.fb-open ~ .fb-fab { display: none; }   /* hide FAB while form modal is open */
+  .fb-fab[hidden] { display: none; }                /* effect-not-found: keep FAB hidden */
+
+  /* Header: add side padding (desktop intentionally has none) and split into two rows.
+     Row 1 = title (grows) + theme toggle pinned right; a full-width ::after flex-break
+     forces Row 2 = Prev/Next/Feedback, left-aligned. */
+  .site-header-inner { padding-left: 12px; padding-right: 12px; row-gap: 8px; }
+  .site-title { order: 1; flex: 1 1 auto; }         /* grows → pushes the theme toggle to the right of row 1 */
+  .theme-toggle { order: 2; }
+  .site-header-inner::after { content: ''; order: 3; flex-basis: 100%; height: 0; }  /* line break before the buttons */
+  #prev { order: 4; } #next { order: 5; }
+  .hdr-btn.fb-toggle { order: 6; margin-left: auto; }  /* push Feedback to the right of row 2; Prev/Next stay left */
+
+  /* Content: stack the colour sections vertically (full width), and lay their card
+     previews out two-across instead of a single tall column. */
+  .colors-row { flex-direction: column; overflow-x: visible; gap: 12px; }
+  .color-sec { width: auto; }                       /* stretch to full width */
+  .art-strip { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .art img { width: 100%; }                          /* fill the grid cell */
+}
 
 /* ===== Feedback drawer ===== */
 .drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(440px, 92vw); background: var(--surface); border-left: 1px solid var(--border); box-shadow: var(--shadow); transform: translateX(100%); transition: transform .2s ease; z-index: 60; display: flex; flex-direction: column; }
@@ -103,6 +145,7 @@ hr.sep { border: 0; border-top: 1px solid var(--border); margin: 18px 0; }
 </main>
 
 <footer class="fb-footer" id="fb-footer">
+  <button class="fb-close" id="fb-close" type="button" aria-label="Close feedback form">×</button>
   <form class="fb-form" id="fb-form">
     <div class="field">
       <label for="colorTiers">Color tiers</label>
@@ -128,6 +171,8 @@ hr.sep { border: 0; border-top: 1px solid var(--border); margin: 18px 0; }
     <p class="fb-msg" id="fb-msg"></p>
   </form>
 </footer>
+<div class="fb-modal-bg" id="fb-modal-bg" hidden></div>
+<button class="fb-fab" id="fb-fab" type="button">✎ Review</button>
 
 <div class="drawer-bg" id="drawer-bg" hidden></div>
 <aside class="drawer" id="drawer" aria-label="Submitted feedback">
@@ -155,11 +200,21 @@ var STATUS_MARK = { accepted:'✓ ', pending:'● ', rejected:'✕ ' };
 function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
 function cardImg(name){ var v = CARDS[name]; if(!v) return ''; return /^https?:/.test(v) ? v : 'https://cards.scryfall.io/normal/front/'+v[0]+'/'+v[1]+'/'+v+'.jpg'; }
 
+// ----- feedback form: sticky footer on desktop; on mobile (≤860px) a FAB opens it as a modal -----
+var footerEl = document.getElementById('fb-footer');
+var fbFab = document.getElementById('fb-fab'), fbModalBg = document.getElementById('fb-modal-bg');
+var mqMobile = window.matchMedia('(max-width: 860px)');
+function openForm(){ footerEl.classList.add('fb-open'); fbModalBg.hidden = false; fbModalBg.classList.add('open'); }
+function closeForm(){ footerEl.classList.remove('fb-open'); fbModalBg.classList.remove('open'); fbModalBg.hidden = true; }
+fbFab.addEventListener('click', openForm);
+document.getElementById('fb-close').addEventListener('click', closeForm);
+fbModalBg.addEventListener('click', closeForm);
+
 // ----- drawer -----
 var drawer = document.getElementById('drawer'), drawerBg = document.getElementById('drawer-bg');
-var footerEl = document.getElementById('fb-footer');
-// drawer bottom = top of the sticky footer, so its content is never hidden behind it
-function syncDrawerBottom(){ drawer.style.bottom = (footerEl && !footerEl.hidden ? footerEl.offsetHeight : 0) + 'px'; }
+// drawer bottom = top of the sticky footer; on mobile the footer is a modal (not a bottom
+// strip), so the drawer runs full-height instead
+function syncDrawerBottom(){ drawer.style.bottom = (!mqMobile.matches && footerEl && !footerEl.hidden ? footerEl.offsetHeight : 0) + 'px'; }
 if (window.ResizeObserver) new ResizeObserver(syncDrawerBottom).observe(footerEl);
 window.addEventListener('resize', syncDrawerBottom);
 syncDrawerBottom();
@@ -244,6 +299,7 @@ function wireForm(eff){
       form.reset(); nameEl.value = localStorage.getItem('cp-reviewer-name') || ''; sync();
       msg.textContent = 'Thanks — feedback saved.';
       await refreshList(eff);
+      closeForm();          // dismiss the mobile form modal (no-op on desktop)
       openDrawer();
     } catch (err) {
       msg.textContent = 'Could not save: ' + (err && err.message ? err.message : err);
@@ -293,6 +349,7 @@ if (i === -1) {
   document.getElementById('effect').innerHTML = '<p class="no-art">Effect not found. <a href="index.html">Back to all effects</a></p>';
   document.getElementById('fb-footer').hidden = true;
   document.getElementById('fb-toggle').hidden = true;
+  fbFab.hidden = true;   // no effect → no feedback affordance
 } else {
   renderEffect(COLORPIE[i]);
   wirePrevNext(i);
