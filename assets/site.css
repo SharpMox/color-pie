@@ -102,13 +102,16 @@ a:hover { text-decoration: underline; }
 /* In-flow page footer (not fixed) — sits at the end of each page's <main class="wrap">,
    so it scrolls with the body and inherits the content column's width + gutters. */
 .site-footer {
-  margin-top: 32px;
-  padding: 20px 0 8px;
+  margin-top: 48px;
+  padding: 28px 16px 26px;
   border-top: 1px solid var(--border);
   text-align: center;
   color: var(--text-soft);
-  font-size: 12px;
-  line-height: 1.7;
+  font-size: 12.5px;
+  line-height: 1.9;
+  letter-spacing: .02em;
 }
 .site-footer p { margin: 0; }
-.site-footer .ff-credit { margin-top: 10px; }
+.site-footer .ff-tech { font-weight: 700; }
+.site-footer .ff-credit { margin-top: 18px; font-weight: 500; }
+.site-footer .ff-names { font-weight: 700; letter-spacing: .08em; }   /* author signature — bold but still subdued */
