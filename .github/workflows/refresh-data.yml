@@ -35,7 +35,8 @@ jobs:
           git add data/colorpie.js
           git commit -m "chore(data): refresh colorpie.js from Notion"
           git push --force origin chore/data-refresh
-          gh pr view chore/data-refresh >/dev/null 2>&1 || \
+          if [ -z "$(gh pr list --head chore/data-refresh --state open --json number -q '.[0].number')" ]; then
             gh pr create --base main --head chore/data-refresh \
               --title "chore(data): refresh colorpie.js from Notion" \
               --body "Automated refresh from Notion via the refresh-data workflow. Review the diff, then merge to deploy."
+          fi
