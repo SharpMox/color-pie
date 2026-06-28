@@ -726,3 +726,41 @@ Auto-picked from Scryfall oracle queries (On-Rate=purity/type/cmc, Cheapest=min 
 - Creature sacrifice, forced, repeatable: [◇]
 - Extra attack: [W]
 - "Enchantress" ability: [W, ◇]
+
+---
+
+# CORRECTION — funny-card leak in ◇ picks (APPLIED to Notion 2026-06-28)
+
+**Root cause:** Phase-3 queries used `-is:funny`, which does NOT exclude Unfinity name-sticker / attraction cards (e.g. Goblin Coward Parade, Eldrazi Guacamole Tightrope are `set_type:funny` but not flagged `is:funny`). Use **`-st:funny`** instead. Result: ~22 ◇ cells got Un-set/silver-border cards, plus 4 Iconic picks were wrong (one wasn't even a real card). Replacements re-researched with `id:c -st:funny` (On-Rate = purity→type→cmc, Cheapest = lowest cmc, drawbacks allowed). Where the colorless pool is empty, set to **❌ Not printed**. 14 new Example Card pages created.
+
+## ◇ Cheapest — distinct real colorless replacements
+- Treasure creation: Sassy Gremlin Blood → **Prying Blade** (1)
+- Untaps itself: Eternal Acrobat Toast → **Brass Man** (1)
+- Rummaging: Playable Delusionary Hydra → **Bag of Holding** (1)
+- "Looting": Playable Delusionary Hydra → **Currency Converter** (1)
+- "Flicker": Eternal Acrobat Toast → **Voyager Staff** (1)
+- Rewards for Death: Elemental Time Flamingo → **Jar of Eyeballs** (3)
+- Creature destruction — Destroy target creature: Goblin Coward Parade → **Gallows at Willow Hill** (3)
+- Forced block: Bumper Cars → **Nemesis Mask** (3)
+- Cast spells from opponent's graveyard/exile: Elemental Time Flamingo → **Grinning Totem** (4)
+- +1/+1 counter (creation and caring): Foam Weapons Kiosk → **Hangarback Walker** (0)
+- "Warlord": Notorious Sliver War → **Glass of the Guildpact** (2, = On-Rate; cheapest colorless anthem)
+- Team pump, ongoing — +N/+N your team: Notorious Sliver War → **Glass of the Guildpact** (2, = On-Rate)
+- Increasing counters and/or tokens: Unassuming Gelatinous Serpent → **Zabaz, the Glimmerwasp** (= On-Rate; no cheaper colorless)
+
+## ◇ On-Rate — was funny
+- Variable Creature: Cradle Clearcutter → **Endless One** (0, purest \*/\*)
+- Direct damage, multiple targets: Welder Automaton → **Chamber Sentry** (= Cheapest)
+- Cast spells from your graveyard: Eldrazi Guacamole Tightrope (On-Rate + Cheapest) → **Wondrous Crucible** (= Iconic)
+- Creature destruction — …controller compensated: Clown Extruder (On-Rate + Cheapest) → **Transmogrifying Wand** (3)
+
+## ◇ Iconic — wrong card (real but wrong effect)
+- "Time Walk": "Rise of the Eldrazi" *(not a real card)* → **Time Vault**
+- Stealing Permanents, Permanently: Emrakul, the Promised End *(steals a turn, not permanents)* → **Memnarch**
+- "Lockdown": Mana Vault *(mana rock)* → **Winter Orb**
+- "Wheeling": Ugin, the Spirit Dragon *(not a wheel)* → **Memory Jar**
+
+## ◇ → ❌ Not printed (no real colorless card does it)
+- Team pump, one-shot — +N/+0 your team: Kiddie Coaster → ❌ (On-Rate + Cheapest)
+- Team pump, one-shot — +N/+N your team: Kiddie Coaster → ❌ (On-Rate + Cheapest)
+- Creature destruction — Destroy creature with power 3+: Goblin Coward Parade → ❌ (all 3 slots)
