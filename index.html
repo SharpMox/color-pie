@@ -4,6 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Color Pie Explorer — Effects by Color</title>
+<meta name="description" content="Browse Magic: The Gathering's color pie — effects organized by color and tier (primary, secondary, tertiary) with example cards, filters, and search."/>
 <link rel="stylesheet" href="assets/site.css"/>
 <style>
 /* ===== Layout ===== */
@@ -584,7 +585,7 @@ fieldset.art.bendbreak > legend { color: var(--c-R); }
   var siteHeader = document.querySelector('.site-header');
   var listHead = document.getElementById('list-head');
   function setStickyTop() { if (siteHeader && listHead) listHead.style.top = siteHeader.offsetHeight + 'px'; }
-  setStickyTop();
+  requestAnimationFrame(setStickyTop);   // defer the offsetHeight read off the init layout pass (avoids a forced reflow)
   window.addEventListener('resize', setStickyTop);
 
   render();
