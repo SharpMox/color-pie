@@ -111,7 +111,7 @@ details.group[open] > .row { margin-top: 6px; }
 .empty { color: var(--text-soft); padding: 30px 10px; text-align: center; }
 
 /* ===== Detail dialog ===== */
-dialog.detail { border: none; border-radius: 16px; padding: 0; background: var(--surface); color: var(--text); box-shadow: var(--shadow); max-width: 760px; width: calc(100% - 24px); }
+dialog.detail { border: none; border-radius: 16px; padding: 0; background: var(--surface); color: var(--text); box-shadow: var(--shadow); max-width: 1100px; width: calc(100% - 24px); }
 dialog.detail::backdrop { background: rgba(0,0,0,.5); }
 .detail-head { position: sticky; top: 0; z-index: 1; background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 16px; }
 .detail-head-row { display: flex; align-items: flex-start; gap: 10px; }
@@ -125,7 +125,7 @@ dialog.detail::backdrop { background: rgba(0,0,0,.5); }
 .detail-body .rationale { margin: 0 0 14px; color: var(--text); }
 .detail-meta { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 16px; }
 .color-sec { margin: 0; padding: 12px 14px; border-radius: 10px; }  /* base = current modal bg */
-.color-sec.alt { background: rgba(128,128,128,.2); }                /* alternate row shade (stronger contrast, both themes) */
+.color-sec.alt { background: var(--bg); }                          /* alternate row shade = main page bg (theme-aware) */
 .color-sec h3 { font-size: 14px; margin: 0 0 8px; display: flex; align-items: center; gap: 8px; }
 .color-sec .tierlab { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
 .tier-primary { background: var(--tier-primary); color: #06210f; }
@@ -137,10 +137,19 @@ fieldset.art { border: 1px solid var(--border); border-radius: 10px; margin: 0; 
 fieldset.art > legend { margin: 0 auto; padding: 0 8px; font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--text-soft); }
 fieldset.art.brk { border-color: var(--c-R); }
 fieldset.art.brk > legend { color: var(--c-R); }
+fieldset.art.bnd { border-color: #e08a2e; }
+fieldset.art.bnd > legend { color: #e08a2e; }
 .art img { width: 182px; max-width: 100%; border-radius: 9px; display: block; background: var(--surface-2); aspect-ratio: 488/680; object-fit: cover; cursor: zoom-in; }
 .img-preview { position: fixed; z-index: 80; width: 420px; max-width: 46vw; border-radius: 14px; border: 1px solid var(--border); box-shadow: var(--shadow); background: var(--surface-2); aspect-ratio: 488/680; object-fit: cover; pointer-events: none; }
 .art .cname { font-size: 12px; margin: 6px 0 0; }
 .no-art { color: var(--text-soft); font-size: 13px; }
+/* Bend/Break subsections: full-width, one row per card (image left, description right) */
+.bb-sec { width: 100%; text-align: left; }
+.bb-row { display: flex; gap: 12px; align-items: flex-start; margin: 8px 0; }
+.bb-row img { width: 120px; flex: none; border-radius: 9px; aspect-ratio: 488/680; object-fit: cover; cursor: zoom-in; }
+.bb-desc { flex: 1; min-width: 0; }
+.bb-desc .cname { display: block; font-size: 13px; font-weight: 600; }
+.bb-desc p { margin: 4px 0 0; color: var(--text-soft); font-size: 13px; }
 
 /* Review affordance (row pill + modal button) */
 .review-cell { display: flex; justify-content: center; align-items: center; }
@@ -150,6 +159,10 @@ fieldset.art.brk > legend { color: var(--c-R); }
 .review.has-accepted, .detail-review.has-accepted { color: var(--c-G); border-color: var(--c-G); }  /* ≥1 accepted feedback */
 .detail-review { margin-left: auto; min-height: 38px; padding: 0 14px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface-2); color: var(--text); font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; }
 .detail-review:hover { border-color: var(--accent); }
+.detail-scryfall { min-height: 38px; padding: 0 14px; border-radius: 9px; background: transparent; color: #fff; font-size: 13px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; border: 1px solid #6a5acd; }  /* Scryfall: purple outline + white label (dark); grouped right after Review */
+.detail-scryfall:hover { background: rgba(106,90,205,.25); }
+html:not([data-theme="dark"]) .detail-scryfall { background: #6a5acd; }            /* light mode: fill so the white label stays readable */
+html:not([data-theme="dark"]) .detail-scryfall:hover { background: #5b4cc0; }
 
 /* ===== Mobile: stack rows (name on top, tags + labeled P/S/T columns below) ===== */
 @media (max-width: 560px) {
@@ -260,6 +273,7 @@ fieldset.art.brk > legend { color: var(--c-R); }
         <span class="tag" id="d-type"></span>
       </div>
       <a class="detail-review" id="d-review" href="#">Review</a>
+      <a class="detail-scryfall" id="d-scryfall" href="#" target="_blank" rel="noopener" hidden>Scryfall</a>
       <button class="detail-close" id="d-close" aria-label="Close">×</button>
     </div>
     <p class="rationale" id="d-rationale"></p>
@@ -290,6 +304,31 @@ fieldset.art.brk > legend { color: var(--c-R); }
   var query = '';
   var fbCounts = {};   // effect id -> feedback count; filled async by the feedback module
   var filt = { type:'', category:'', interaction:new Set(), duration:new Set(), baseKeyword:new Set() };
+
+  // ----- Filter persistence (localStorage) -----
+  var LS_KEY = 'colorpie.filters';
+  function saveFilters() {
+    try {
+      localStorage.setItem(LS_KEY, JSON.stringify({
+        selected: [...selected], query: query, tier: tier,
+        type: filt.type, category: filt.category,
+        interaction: [...filt.interaction], duration: [...filt.duration], baseKeyword: [...filt.baseKeyword]
+      }));
+    } catch (e) { /* private mode / quota — persistence is best-effort */ }
+  }
+  function restoreFilters() {
+    try {
+      var s = JSON.parse(localStorage.getItem(LS_KEY) || 'null'); if (!s) return;
+      if (Array.isArray(s.selected)) selected = new Set(s.selected);
+      if (typeof s.query === 'string') query = s.query;
+      if (typeof s.tier === 'string') tier = s.tier;
+      filt.type = s.type || ''; filt.category = s.category || '';
+      filt.interaction = new Set(s.interaction || []);
+      filt.duration = new Set(s.duration || []);
+      filt.baseKeyword = new Set(s.baseKeyword || []);
+    } catch (e) { /* corrupt/blocked — fall back to defaults */ }
+  }
+  restoreFilters();   // before controls build, so picker/tier-note come up correct
 
   // ----- Build groups: effects sharing a `base` label, first-appearance order.
   // `base` is a grouping label (the Ranking relation), not necessarily a real
@@ -394,6 +433,7 @@ fieldset.art.brk > legend { color: var(--c-R); }
       tierCells(be) + '</summary>' + inner + '</details>' : inner;
   }
   function render() {
+    saveFilters();   // persist on every filter change (all changes call render)
     // Each section splits into a name-match bucket (top) and the rest; GROUPS is walked
     // in natural order so each bucket stays stably ordered. No query → all rows land in
     // *Top, so output matches the natural-order list exactly.
@@ -435,18 +475,34 @@ fieldset.art.brk > legend { color: var(--c-R); }
     var trank = function (c) { var v = TORDER[eff.rank[c.k]]; return v == null ? 3 : v; };
     var secs = cols.slice().sort(function (a, b) { return trank(a) - trank(b); }).map(function (c, i) {
       var t = eff.rank[c.k];
-      var picks = t ? ['onRate','cheapest','iconic'] : ['bend','breaks'];
+      var tilePicks = t ? ['onRate','cheapest','iconic'] : [];   // bend/break moved to their own subsections below
       var cell = eff.cards[c.k] || {};
-      var arts = picks.filter(function (p) { return cell[p]; }).map(function (p) {
+      var arts = tilePicks.filter(function (p) { return cell[p]; }).map(function (p) {
         var name = cell[p], img = cardImg(name);
-        return '<fieldset class="art' + (p === 'breaks' ? ' brk' : '') + '"><legend>' + ARCH[p] + '</legend>' +
+        return '<fieldset class="art"><legend>' + ARCH[p] + '</legend>' +
           (img ? '<img loading="lazy" src="' + esc(img) + '" alt="' + esc(name) + '"/>' : '') +
           '<p class="cname">' + esc(name) + '</p></fieldset>';
       }).join('');
+      // Bend / Break subsections: object {1:{name,desc}} → image+description rows;
+      // legacy string → a single row with no description.
+      var bb = ['bend','breaks'].map(function (p) {
+        var v = cell[p]; if (!v) return '';
+        var items = typeof v === 'string' ? [{ name: v, desc: '' }]
+          : Object.keys(v).sort(function (a, b) { return a - b; }).map(function (k) { return v[k]; });
+        var rows = items.map(function (it) {
+          var img = cardImg(it.name);
+          return '<div class="bb-row">' +
+            (img ? '<img loading="lazy" src="' + esc(img) + '" alt="' + esc(it.name) + '"/>' : '') +
+            '<div class="bb-desc"><span class="cname">' + esc(it.name) + '</span>' +
+            (it.desc ? '<p>' + esc(it.desc) + '</p>' : '') + '</div></div>';
+        }).join('');
+        return '<fieldset class="art bb-sec' + (p === 'breaks' ? ' brk' : ' bnd') + '"><legend>' + ARCH[p] + '</legend>' + rows + '</fieldset>';
+      }).join('');
       var lab = t ? '<span class="tierlab tier-' + t + '">' + TIERWORD[t] + '</span>'
                   : '<span class="tierlab tier-off">Off-pie</span>';
+      var body = (arts ? '<div class="art-strip">' + arts + '</div>' : '') + bb;
       return '<div class="color-sec' + (i % 2 ? ' alt' : '') + '"><h3><span class="badge ' + c.k + '" title="' + c.name + '"></span>' + c.name + lab + '</h3>' +
-        (arts ? '<div class="art-strip">' + arts + '</div>' : '<p class="no-art">No example card.</p>') + '</div>';
+        (body || '<p class="no-art">No example card.</p>') + '</div>';
     }).join('');
     return secs;
   }
@@ -467,6 +523,9 @@ fieldset.art.brk > legend { color: var(--c-R); }
       .filter(function (m) { return m[1]; })
       .map(function (m) { return '<span class="tag">' + m[0] + ': ' + esc(m[1]) + '</span>'; }).join('');
     document.getElementById('d-body').innerHTML = detailHTML(eff);
+    var sf = document.getElementById('d-scryfall');
+    sf.hidden = !eff.scryfall;
+    if (eff.scryfall) sf.href = eff.scryfall;
     var c = fbCounts[eff.id] || { total: 0, accepted: 0 };
     var rev = document.getElementById('d-review');
     rev.href = 'review.html?id=' + encodeURIComponent(eff.id);
@@ -568,6 +627,20 @@ fieldset.art.brk > legend { color: var(--c-R); }
   buildChips('f-interaction', uniq(function (e) { return e.interaction; }), 'interaction');
   buildChips('f-duration',    uniq(function (e) { return e.duration; }),    'duration');
   buildChips('f-baseKeyword', uniq(function (e) { return e.baseKeyword; }), 'baseKeyword');
+
+  // reflect restored filter state onto the controls the build code hardcodes
+  // (picker + tier-note already read `selected` during build)
+  (function syncControls() {
+    document.getElementById('search').value = query;
+    [].forEach.call(tierEl.children, function (x) { x.setAttribute('aria-pressed', x.dataset.tier === tier ? 'true' : 'false'); });
+    document.getElementById('f-type').value = filt.type;
+    document.getElementById('f-cat').value = filt.category;
+    [['f-interaction','interaction'], ['f-duration','duration'], ['f-baseKeyword','baseKeyword']].forEach(function (p) {
+      [].forEach.call(document.getElementById(p[0]).children, function (b) {
+        b.setAttribute('aria-pressed', filt[p[1]].has(b.dataset.v) ? 'true' : 'false');
+      });
+    });
+  })();
 
   // row click → detail (delegation); the Review pill navigates instead
   document.getElementById('list').addEventListener('click', function (e) {
