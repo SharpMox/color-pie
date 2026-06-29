@@ -19,6 +19,8 @@
 .hdr-btn.fb-toggle { border-color: var(--accent); color: var(--accent); margin-left: auto; }
 .hdr-btn.fb-toggle.has-accepted { border-color: var(--c-G); color: var(--c-G); }
 .theme-toggle { margin-left: 0; }  /* sit right after the Feedback button, not pushed apart */
+.hdr-scryfall { border-color: #6a5acd; color: #6a5acd; }   /* Scryfall purple, header-button style */
+#hdr-scryfall { display: none; }                           /* desktop: in-content Scryfall button is used instead; shown only on mobile */
 h2.eff-title { margin: 0 0 4px; font-size: 20px; }
 .eff-sub-row { display: flex; align-items: center; gap: 12px; margin: 0 0 10px; }
 .eff-sub { color: var(--text-soft); font-size: 16px; margin: 0; }
@@ -103,11 +105,13 @@ hr.sep { border: 0; border-top: 1px solid var(--border); margin: 18px 0; }
      Row 1 = title (grows) + theme toggle pinned right; a full-width ::after flex-break
      forces Row 2 = Prev/Next/Feedback, left-aligned. */
   .site-header-inner { padding-left: 12px; padding-right: 12px; row-gap: 8px; }
-  .site-title { order: 1; flex: 1 1 auto; }         /* grows → pushes the theme toggle to the right of row 1 */
-  .theme-toggle { order: 2; }
-  .site-header-inner::after { content: ''; order: 3; flex-basis: 100%; height: 0; }  /* line break before the buttons */
-  #prev { order: 4; } #next { order: 5; }
-  .hdr-btn.fb-toggle { order: 6; margin-left: auto; }  /* push Feedback to the right of row 2; Prev/Next stay left */
+  .site-title { order: 1; flex: 1 1 auto; }         /* grows → pushes Prev/Next/theme to the right of row 1 */
+  #prev { order: 2; } #next { order: 3; }
+  .theme-toggle { order: 4; }                        /* Prev · Next · theme, grouped right on row 1 */
+  .site-header-inner::after { content: ''; order: 5; flex-basis: 100%; height: 0; }  /* line break → row 2 */
+  #hdr-scryfall:not([hidden]) { order: 6; margin-left: auto; display: inline-flex; }  /* row 2: Scryfall + Feedback, grouped right */
+  .hdr-btn.fb-toggle { order: 7; margin-left: 0; }
+  .eff-sub-row .eff-scryfall { display: none; }      /* on mobile the Scryfall button lives in the header instead */
 
   /* Content: stack the colour sections vertically (full width), and lay their card
      previews out two-across instead of a single tall column. */
@@ -155,6 +159,7 @@ hr.sep { border: 0; border-top: 1px solid var(--border); margin: 18px 0; }
     <h1 class="site-title"><a href="index.html" title="Back to all effects">Color Pie <small>· Review</small></a></h1>
     <a id="prev" class="hdr-btn" href="#">← Prev</a>
     <a id="next" class="hdr-btn" href="#">Next →</a>
+    <a id="hdr-scryfall" class="hdr-btn hdr-scryfall" href="#" target="_blank" rel="noopener" hidden>Scryfall</a>
     <button class="hdr-btn fb-toggle" id="fb-toggle" type="button">Feedback (<span id="fb-n">0</span>)</button>
     <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode" aria-pressed="false">◐</button>
   </div>
@@ -265,6 +270,9 @@ effectEl.addEventListener('mouseout', function(e){ if (e.target.closest('.art im
 
 function renderEffect(eff){
   document.title = 'Review: ' + eff.title + ' — Color Pie';
+  var hs = document.getElementById('hdr-scryfall');   // mobile-only header Scryfall button
+  hs.hidden = !eff.scryfall;
+  if (eff.scryfall) hs.href = eff.scryfall;
   var meta = [['Interaction',eff.interaction],['Duration',eff.duration],['Base keyword',eff.baseKeyword]]
     .filter(function(m){return m[1];})
     .map(function(m){return '<span class="tag">'+m[0]+': '+esc(m[1])+'</span>';}).join('');
