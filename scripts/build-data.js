@@ -98,6 +98,7 @@ const effects = read('Effects.csv')
     interaction: r['Interaction'] || '',
     duration: r['Duration'] || '',
     baseKeyword: r['Base Keyword'] || '',
+    scryfall: r['Scryfall Query'] || '',
     rank, cards
   };
 }).filter(Boolean);
