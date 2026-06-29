@@ -115,6 +115,12 @@ hr.sep { border: 0; border-top: 1px solid var(--border); margin: 18px 0; }
   .color-sec { width: auto; }                       /* stretch to full width */
   .art-strip { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .art img { width: 100%; }                          /* fill the grid cell */
+
+  /* Bend/Break: match the main-page modal — horizontal row, image left + description right */
+  .bb-row { flex-direction: row; gap: 12px; align-items: flex-start; }
+  .bb-row img { width: 120px; flex: none; }          /* override the 100% art-img rule above */
+  .bb-desc { flex: 1; }
+  .bb-desc .cname, .bb-desc p { font-size: 13px; }
 }
 
 /* ===== Feedback drawer ===== */
