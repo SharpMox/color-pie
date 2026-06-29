@@ -213,7 +213,7 @@ import { addFeedback, listFeedback } from './assets/feedback.js';
 
 var COLORS = [['W','White'],['U','Blue'],['B','Black'],['R','Red'],['G','Green'],['C','Colorless']];
 var TIERWORD = { primary:'Primary', secondary:'Secondary', tertiary:'Tertiary' };
-var ARCH = { onRate:'On-rate', cheapest:'Cheapest', iconic:'Iconic', bend:'Bend', breaks:'Break' };
+var ARCH = { onRate:'On-rate', cheapest:'Cheapest', outdated:'Outdated', iconic:'Iconic', bend:'Bend', breaks:'Break' };
 var FIELD_IDS = ['colorTiers','cardExamples','scopeDuplicate','otherMetadata'];
 var FIELD_LABEL = { colorTiers:'Color tiers', cardExamples:'Card examples', scopeDuplicate:'Scope / duplicates', otherMetadata:'Other metadata' };
 var STATUS_ORDER = { accepted:0, pending:1, rejected:2 };
@@ -274,7 +274,7 @@ function renderEffect(eff){
   var trank = function(k){ var v=TORDER[eff.rank[k]]; return v==null?3:v; };
   var secs = COLORS.slice().sort(function(a,b){return trank(a[0])-trank(b[0]);}).map(function(c){
     var t = eff.rank[c[0]];
-    var tilePicks = t ? ['onRate','cheapest','iconic'] : [];   // bend/break moved to their own subsections below
+    var tilePicks = t ? ['onRate','cheapest','outdated','iconic'] : [];   // bend/break moved to their own subsections below
     var cell = eff.cards[c[0]] || {};
     var arts = tilePicks.filter(function(p){return cell[p];}).map(function(p){
       var name = cell[p], img = cardImg(name);

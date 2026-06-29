@@ -94,6 +94,7 @@ const effects = read('Effects.csv')
     const c = {};
     const on = firstCard(r[col]);                    if (on) c.onRate = pick(on);
     const ch = firstCard(r[col + ' (Cheapest)']);    if (ch) c.cheapest = pick(ch);
+    const od = firstCard(r[col + ' (Outdated)']);    if (od) c.outdated = pick(od);
     const ic = firstCard(r[col + ' (Iconic)']);      if (ic) c.iconic = pick(ic);
     const bn = firstCard(r[col + ' (Bends)']);       if (bn) c.bend = pick(bn);
     const bk = firstCard(r[col + ' (Breaks)']);      if (bk) c.breaks = pick(bk);
