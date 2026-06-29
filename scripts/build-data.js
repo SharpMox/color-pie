@@ -124,6 +124,13 @@ if (process.argv.includes('--check')) {
   const withArt = effects.filter(e =>
     Object.values(e.cards).some(c => Object.values(c).some(n => CARDS[n]))).length;
   if (withArt < 100) errs.push('only ' + withArt + ' effects have card art (expected >100)');
+  // id is the review system's stable key (Notion Index/unique_id). Empty or
+  // duplicate ids silently break feedback save/load + prev/next — fail loudly.
+  const noId = effects.filter(e => !e.id).length;
+  if (noId) errs.push(noId + ' effects have an empty id (Notion "Index" unique_id missing?)');
+  const ids = effects.map(e => e.id).filter(Boolean);
+  const dupIds = [...new Set(ids.filter((v, i) => ids.indexOf(v) !== i))];
+  if (dupIds.length) errs.push(dupIds.length + ' duplicate effect ids: ' + dupIds.slice(0, 5).join(', '));
   if (errs.length) { console.error('CHECK FAILED:\n - ' + errs.join('\n - ')); process.exit(1); }
   console.log('CHECK PASSED: ' + effects.length + ' effects · Flying primary in White · ' + withArt + ' effects have art');
 }
