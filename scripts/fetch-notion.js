@@ -23,7 +23,7 @@ const DS = {
 
 const COLOR_COLS = [];
 for (const c of ['⚪ White', '🔵 Blue', '⚫ Black', '🔴 Red', '🟢 Green', '◇ Colorless'])
-  for (const s of ['', ' (Cheapest)', ' (Iconic)', ' (Bend/Break)']) COLOR_COLS.push(c + s);
+  for (const s of ['', ' (Cheapest)', ' (Iconic)', ' (Bends)', ' (Breaks)']) COLOR_COLS.push(c + s);
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const pageUrl = id => 'https://www.notion.so/' + id.replace(/-/g, '');
