@@ -16,19 +16,14 @@
 .hdr-btn { min-height: 34px; padding: 0 12px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface-2); color: var(--text); font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; }
 .hdr-btn:hover { border-color: var(--accent); }
 .hdr-btn[aria-disabled="true"] { opacity: .4; pointer-events: none; }
-.hdr-btn.fb-toggle { border-color: var(--accent); color: var(--accent); margin-left: auto; }
+.hdr-btn.fb-toggle { border-color: var(--accent); color: var(--accent); }
 .hdr-btn.fb-toggle.has-accepted { border-color: var(--c-G); color: var(--c-G); }
 .theme-toggle { margin-left: 0; }  /* sit right after the Feedback button, not pushed apart */
-.hdr-scryfall { border-color: #6a5acd; color: #6a5acd; }   /* Scryfall purple, header-button style */
-#hdr-scryfall { display: none; }                           /* desktop: in-content Scryfall button is used instead; shown only on mobile */
+.hdr-scryfall { border-color: #6a5acd; color: #6a5acd; margin-left: auto; }   /* Scryfall purple; its auto pushes Scryfall + Feedback + theme to the right */
+#hdr-scryfall[hidden] + .hdr-btn.fb-toggle { margin-left: auto; }              /* fallback: with no Scryfall link, Feedback right-aligns on its own */
 h2.eff-title { margin: 0 0 4px; font-size: 20px; }
-.eff-sub-row { display: flex; align-items: center; gap: 12px; margin: 0 0 10px; }
-.eff-sub { color: var(--text-soft); font-size: 16px; margin: 0; }
+.eff-sub { color: var(--text-soft); font-size: 16px; margin: 0 0 10px; }
 .rationale { margin: 0 0 12px; }
-.eff-scryfall { display: inline-flex; align-items: center; margin-left: auto; flex: none; padding: 6px 12px; border-radius: 9px; background: transparent; color: #fff; font-size: 14px; font-weight: 600; text-decoration: none; border: 1px solid #6a5acd; }  /* Scryfall: purple outline + white label (dark); sits at end of title row */
-.eff-scryfall:hover { background: rgba(106,90,205,.25); }
-html:not([data-theme="dark"]) .eff-scryfall { background: #6a5acd; }            /* light mode: fill so the white label stays readable */
-html:not([data-theme="dark"]) .eff-scryfall:hover { background: #5b4cc0; }
 .detail-meta { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 16px; }
 .tag { font-size: 16px; color: var(--text-soft); border: 1px solid var(--border); border-radius: 6px; padding: 1px 6px; }
 .detail-meta .tag { font-size: 16px; padding: 8px 14px; border-radius: 10px; color: var(--text); }
@@ -111,7 +106,6 @@ hr.sep { border: 0; border-top: 1px solid var(--border); margin: 18px 0; }
   .site-header-inner::after { content: ''; order: 5; flex-basis: 100%; height: 0; }  /* line break → row 2 */
   #hdr-scryfall:not([hidden]) { order: 6; margin-left: auto; display: inline-flex; }  /* row 2: Scryfall + Feedback, grouped right */
   .hdr-btn.fb-toggle { order: 7; margin-left: 0; }
-  .eff-sub-row .eff-scryfall { display: none; }      /* on mobile the Scryfall button lives in the header instead */
 
   /* Content: stack the colour sections vertically (full width), and lay their card
      previews out two-across instead of a single tall column. */
@@ -270,7 +264,7 @@ effectEl.addEventListener('mouseout', function(e){ if (e.target.closest('.art im
 
 function renderEffect(eff){
   document.title = 'Review: ' + eff.title + ' — Color Pie';
-  var hs = document.getElementById('hdr-scryfall');   // mobile-only header Scryfall button
+  var hs = document.getElementById('hdr-scryfall');   // header Scryfall button (next to Feedback, all viewports)
   hs.hidden = !eff.scryfall;
   if (eff.scryfall) hs.href = eff.scryfall;
   var meta = [['Interaction',eff.interaction],['Duration',eff.duration],['Base keyword',eff.baseKeyword]]
@@ -310,8 +304,7 @@ function renderEffect(eff){
   }).join('');
   document.getElementById('effect').innerHTML =
     '<h2 class="eff-title">'+esc(eff.title)+'</h2>'+
-    '<div class="eff-sub-row"><p class="eff-sub">'+esc(eff.type)+(eff.category?' · '+esc(eff.category):'')+'</p>'+
-    (eff.scryfall?'<a class="eff-scryfall" href="'+esc(eff.scryfall)+'" target="_blank" rel="noopener">Scryfall</a>':'')+'</div>'+
+    '<p class="eff-sub">'+esc(eff.type)+(eff.category?' · '+esc(eff.category):'')+'</p>'+
     '<p class="rationale">'+esc(eff.rationale||'')+'</p>'+
     (meta?'<div class="detail-meta">'+meta+'</div>':'')+
     '<div class="colors-row">'+secs+'</div>';
