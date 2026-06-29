@@ -44,6 +44,17 @@ function relNames(cell) {
 }
 const firstCard = cell => relNames(cell).find(n => SENTINELS.indexOf(n) === -1) || null;
 
+// Scryfall link tuning: the Notion column stores the pure effect query; the site
+// link shows each card's FIRST printing (is:firstprint) ordered by most recent
+// release. Applied uniformly here so Notion stays the canonical pure query.
+function scryUrl(notionUrl) {
+  if (!notionUrl) return '';
+  const i = notionUrl.indexOf('?q=');
+  if (i === -1) return notionUrl;
+  const q = decodeURIComponent(notionUrl.slice(i + 3).split('&')[0]);
+  return 'https://scryfall.com/search?q=' + encodeURIComponent(q + ' is:firstprint') + '&order=released&dir=desc';
+}
+
 // ---- Example Cards: name -> image url ----
 const imgByName = {};
 read('Example Cards.csv').forEach(r => {
@@ -98,7 +109,7 @@ const effects = read('Effects.csv')
     interaction: r['Interaction'] || '',
     duration: r['Duration'] || '',
     baseKeyword: r['Base Keyword'] || '',
-    scryfall: r['Scryfall Query'] || '',
+    scryfall: scryUrl(r['Scryfall Query']),
     rank, cards
   };
 }).filter(Boolean);
@@ -132,6 +143,8 @@ if (process.argv.includes('--check')) {
   const ids = effects.map(e => e.id).filter(Boolean);
   const dupIds = [...new Set(ids.filter((v, i) => ids.indexOf(v) !== i))];
   if (dupIds.length) errs.push(dupIds.length + ' duplicate effect ids: ' + dupIds.slice(0, 5).join(', '));
+  const sx = scryUrl('https://scryfall.com/search?q=keyword%3Aflying');
+  if (!/is%3Afirstprint/.test(sx) || !/order=released&dir=desc/.test(sx)) errs.push('scryUrl transform broken: ' + sx);
   if (errs.length) { console.error('CHECK FAILED:\n - ' + errs.join('\n - ')); process.exit(1); }
   console.log('CHECK PASSED: ' + effects.length + ' effects · Flying primary in White · ' + withArt + ' effects have art');
 }
