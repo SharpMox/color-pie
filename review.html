@@ -20,9 +20,8 @@
 .hdr-btn.fb-toggle.has-accepted { border-color: var(--c-G); color: var(--c-G); }
 .theme-toggle { margin-left: 0; }  /* sit right after the Feedback button, not pushed apart */
 h2.eff-title { margin: 0 0 4px; font-size: 20px; }
-.eff-title-row { display: flex; align-items: center; gap: 12px; margin: 0 0 4px; }
-.eff-title-row .eff-title { margin: 0; }
-.eff-sub { color: var(--text-soft); font-size: 16px; margin: 0 0 10px; }
+.eff-sub-row { display: flex; align-items: center; gap: 12px; margin: 0 0 10px; }
+.eff-sub { color: var(--text-soft); font-size: 16px; margin: 0; }
 .rationale { margin: 0 0 12px; }
 .eff-scryfall { display: inline-flex; align-items: center; margin-left: auto; flex: none; padding: 6px 12px; border-radius: 9px; background: transparent; color: #fff; font-size: 14px; font-weight: 600; text-decoration: none; border: 1px solid #6a5acd; }  /* Scryfall: purple outline + white label (dark); sits at end of title row */
 .eff-scryfall:hover { background: rgba(106,90,205,.25); }
@@ -296,9 +295,9 @@ function renderEffect(eff){
       (body||'<p class="no-art">No example card.</p>')+'</div>';
   }).join('');
   document.getElementById('effect').innerHTML =
-    '<div class="eff-title-row"><h2 class="eff-title">'+esc(eff.title)+'</h2>'+
+    '<h2 class="eff-title">'+esc(eff.title)+'</h2>'+
+    '<div class="eff-sub-row"><p class="eff-sub">'+esc(eff.type)+(eff.category?' · '+esc(eff.category):'')+'</p>'+
     (eff.scryfall?'<a class="eff-scryfall" href="'+esc(eff.scryfall)+'" target="_blank" rel="noopener">Scryfall</a>':'')+'</div>'+
-    '<p class="eff-sub">'+esc(eff.type)+(eff.category?' · '+esc(eff.category):'')+'</p>'+
     '<p class="rationale">'+esc(eff.rationale||'')+'</p>'+
     (meta?'<div class="detail-meta">'+meta+'</div>':'')+
     '<div class="colors-row">'+secs+'</div>';
