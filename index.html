@@ -157,12 +157,11 @@ fieldset.art.bnd > legend { color: #e08a2e; }
 .review:hover { border-color: var(--accent); }
 .review.review-disabled { color: var(--text-soft); }  /* group summary: click expands to reveal each variant's review button */
 .review.has-accepted, .detail-review.has-accepted { color: var(--c-G); border-color: var(--c-G); }  /* ≥1 accepted feedback */
-.detail-review { margin-left: auto; min-height: 38px; padding: 0 14px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface-2); color: var(--text); font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; }
+.detail-review { min-height: 38px; padding: 0 14px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface-2); color: var(--text); font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; }
 .detail-review:hover { border-color: var(--accent); }
-.detail-scryfall { min-height: 38px; padding: 0 14px; border-radius: 9px; background: transparent; color: #fff; font-size: 13px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; border: 1px solid #6a5acd; }  /* Scryfall: purple outline + white label (dark); grouped right after Review */
-.detail-scryfall:hover { background: rgba(106,90,205,.25); }
-html:not([data-theme="dark"]) .detail-scryfall { background: #6a5acd; }            /* light mode: fill so the white label stays readable */
-html:not([data-theme="dark"]) .detail-scryfall:hover { background: #5b4cc0; }
+.detail-scryfall { margin-left: auto; min-height: 38px; padding: 0 14px; border-radius: 9px; background: transparent; color: #6a5acd; font-size: 13px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; border: 1px solid #6a5acd; }  /* Scryfall: purple outline + purple label; first of the right group (Scryfall · Review · ×) */
+.detail-scryfall:hover { background: rgba(106,90,205,.12); }
+.detail-scryfall[hidden] + .detail-review { margin-left: auto; }   /* fallback: no Scryfall → Review right-aligns */
 
 /* ===== Mobile: stack rows (name on top, tags + labeled P/S/T columns below) ===== */
 @media (max-width: 560px) {
@@ -195,7 +194,9 @@ html:not([data-theme="dark"]) .detail-scryfall:hover { background: #5b4cc0; }
     background: var(--surface); border-bottom: 1px solid var(--border);
     padding: 12px 14px;
   }
-  .detail-head-row > div { order: 2; flex: 1 1 100%; }   /* title block drops below; Review's margin-left:auto keeps Review + × grouped top-right */
+  .detail-head-row > div { order: 2; flex: 1 1 100%; }   /* title block drops below the button row */
+  .detail-scryfall { margin-left: 0; }                   /* mobile: Scryfall + Review align left… */
+  .detail-close { margin-left: auto; }                   /* …and the close × stays top-right */
   .detail-head .rationale { padding: 12px 14px 0; margin: 0; font-size: 14px; }   /* now outside the sticky header → scrolls */
   .detail-head .detail-meta { padding: 0 14px; margin: 10px 0 16px; }
   .detail-head h2 { font-size: 16px; }
@@ -272,8 +273,8 @@ html:not([data-theme="dark"]) .detail-scryfall:hover { background: #5b4cc0; }
         <h2 id="d-title"></h2>
         <span class="tag" id="d-type"></span>
       </div>
-      <a class="detail-review" id="d-review" href="#">Review</a>
       <a class="detail-scryfall" id="d-scryfall" href="#" target="_blank" rel="noopener" hidden>Scryfall</a>
+      <a class="detail-review" id="d-review" href="#">Review</a>
       <button class="detail-close" id="d-close" aria-label="Close">×</button>
     </div>
     <p class="rationale" id="d-rationale"></p>
