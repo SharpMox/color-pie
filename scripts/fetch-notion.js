@@ -126,13 +126,14 @@ async function main() {
   })));
 
   const effHeaders = ['Effect', 'Index', 'Type', 'Interaction', 'Duration', 'Base Keyword',
-    'Design Rationale', 'Sort Order', 'Category', 'Ranking', ...COLOR_COLS];
+    'Design Rationale', 'Scryfall Query', 'Sort Order', 'Category', 'Ranking', ...COLOR_COLS];
   writeCSV('Effects.csv', effHeaders, effects.map(p => {
     const r = {
       Effect: titleOf(p), Index: indexOf(p),
       Type: val(p.properties['Type']), Interaction: val(p.properties['Interaction']),
       Duration: val(p.properties['Duration']), 'Base Keyword': val(p.properties['Base Keyword']),
       'Design Rationale': val(p.properties['Design Rationale']), 'Sort Order': val(p.properties['Sort Order']),
+      'Scryfall Query': val(p.properties['Scryfall Query']),
       Category: relCell(relIds(p, 'Category'), catMap), Ranking: relCell(relIds(p, 'Ranking'), rankMap),
     };
     for (const col of COLOR_COLS) r[col] = relCell(relIds(p, col), cardMap);
