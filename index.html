@@ -146,11 +146,9 @@ fieldset.art.bnd > legend { color: #e08a2e; }
 .no-art { color: var(--text-soft); font-size: 13px; }
 /* Bend/Break: each card is an image-width tile (left-aligned), image + title/desc centered inside */
 fieldset.art.bb-sec { width: fit-content; max-width: 100%; }
-.bb-row { display: flex; flex-direction: column; align-items: center; gap: 6px; margin: 8px 0; }
-.bb-row img { width: 182px; flex: none; }
-.bb-desc { min-width: 0; text-align: center; }
-.bb-desc .cname { display: block; }   /* inherit .art .cname (12px, normal weight, centered) */
-.bb-desc p { margin: 4px 0 0; color: var(--text-soft); font-size: 13px; }
+.bb-row { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; margin: 8px 0; }
+.bb-card { width: 182px; max-width: 100%; text-align: center; }   /* image-width tile: image + title centered */
+.bb-note { max-width: 340px; text-align: left; margin: 4px 0 0; color: var(--text-soft); font-size: 12px; }   /* wider description, left-aligned */
 
 /* Review affordance (row pill + modal button) */
 .review-cell { display: flex; justify-content: center; align-items: center; }
@@ -493,10 +491,10 @@ fieldset.art.bb-sec { width: fit-content; max-width: 100%; }
           : Object.keys(v).sort(function (a, b) { return a - b; }).map(function (k) { return v[k]; });
         var rows = items.map(function (it) {
           var img = cardImg(it.name);
-          return '<div class="bb-row">' +
+          return '<div class="bb-row"><div class="bb-card">' +
             (img ? '<img loading="lazy" src="' + esc(img) + '" alt="' + esc(it.name) + '"/>' : '') +
-            '<div class="bb-desc"><span class="cname">' + esc(it.name) + '</span>' +
-            (it.desc ? '<p>' + esc(it.desc) + '</p>' : '') + '</div></div>';
+            '<span class="cname">' + esc(it.name) + '</span></div>' +
+            (it.desc ? '<p class="bb-note">' + esc(it.desc) + '</p>' : '') + '</div>';
         }).join('');
         return '<fieldset class="art bb-sec' + (p === 'breaks' ? ' brk' : ' bnd') + '"><legend>' + ARCH[p] + '</legend>' + rows + '</fieldset>';
       }).join('');
