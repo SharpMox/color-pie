@@ -33,16 +33,16 @@ h2.eff-title { margin: 0 0 4px; font-size: 20px; }
 .badge.G{--col:var(--c-G);--col-ink:var(--c-G-ink)} .badge.C{--col:var(--c-C);--col-ink:var(--c-C-ink)}
 .badge.Y{--col:var(--c-Y);--col-ink:var(--c-Y-ink)}
 
-/* Colors on a single horizontal row (scrolls on mobile) */
-.colors-row { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; margin: 0 0 6px; }
-.color-sec { flex: 0 0 auto; width: 218px; margin: 0; border: 1px solid var(--border); border-radius: 10px; padding: 8px; background: var(--surface); }
+/* Colors stacked as full-width rows */
+.colors-row { display: flex; flex-direction: column; gap: 12px; margin: 0 0 6px; }
+.color-sec { margin: 0; border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; background: var(--surface); }
 .color-sec h3 { font-size: 14px; margin: 0 0 8px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .tierlab { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 999px; }
 .tier-primary { background: var(--tier-primary); color: #06210f; }
 .tier-secondary { background: var(--tier-secondary); color: #2a1402; }
 .tier-tertiary { background: var(--tier-tertiary); color: #14171c; }
 .tier-off { background: transparent; color: var(--text-soft); border: 1px dashed var(--border); }
-.art-strip { display: flex; flex-direction: column; gap: 8px; }
+.art-strip { display: flex; flex-wrap: wrap; gap: 12px; }
 fieldset.art { border: 1px solid var(--border); border-radius: 8px; margin: 0; padding: 6px; width: auto; text-align: center; }
 fieldset.art > legend { margin: 0 auto; padding: 0 6px; font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-soft); }
 fieldset.art.brk { border-color: var(--c-R); }
@@ -108,10 +108,7 @@ hr.sep { border: 0; border-top: 1px solid var(--border); margin: 18px 0; }
   #hdr-scryfall:not([hidden]) { order: 6; margin-left: auto; display: inline-flex; }  /* row 2: Scryfall + Feedback, grouped right */
   .hdr-btn.fb-toggle { order: 7; margin-left: 0; }
 
-  /* Content: stack the colour sections vertically (full width), and lay their card
-     previews out two-across instead of a single tall column. */
-  .colors-row { flex-direction: column; overflow-x: visible; gap: 12px; }
-  .color-sec { width: auto; }                       /* stretch to full width */
+  /* Content: lay card previews two-across on small screens instead of wrapping at full size. */
   .art-strip { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .art img { width: 100%; }                          /* fill the grid cell */
 
