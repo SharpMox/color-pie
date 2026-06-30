@@ -146,7 +146,8 @@ fieldset.art.bnd > legend { color: #e08a2e; }
 .no-art { color: var(--text-soft); font-size: 13px; }
 /* Bend/Break: each card is an image-width tile (left-aligned), image + title/desc centered inside */
 fieldset.art.bb-sec { width: 100%; }
-.bb-cards { display: flex; flex-wrap: wrap; gap: 12px; }   /* bend/break cards in a wrapping row */
+.bb-cards { display: flex; flex-wrap: wrap; row-gap: 16px; }   /* bend/break cards in a wrapping row */
+.bb-row + .bb-row { border-left: 1px solid var(--border); margin-left: 16px; padding-left: 16px; }   /* separator between cards */
 .bb-row { display: flex; align-items: flex-start; gap: 10px; width: 360px; max-width: 100%; }   /* card: image+title (left) · description (right) */
 .bb-card { width: 130px; flex: none; text-align: center; }
 .bb-card img { width: 130px; max-width: 100%; }
