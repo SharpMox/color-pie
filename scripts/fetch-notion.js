@@ -24,8 +24,7 @@ const DS = {
 const COLOR_COLS = [];
 for (const c of ['⚪ White', '🔵 Blue', '⚫ Black', '🔴 Red', '🟢 Green', '◇ Colorless'])
   for (const s of ['', ' (Cheapest)', ' (Outdated)', ' (Iconic)', ' (Bends)', ' (Breaks)']) COLOR_COLS.push(c + s);
-// 🟡 MultiColor: base (On-Rate) + Outdated only — no Cheapest/Iconic/Bends/Breaks columns exist
-for (const s of ['', ' (Outdated)']) COLOR_COLS.push('🟡 MultiColor' + s);
+for (const s of ['', ' (Cheapest)', ' (Outdated)', ' (Iconic)', ' (Bends)', ' (Breaks)']) COLOR_COLS.push('🟡 MultiColor' + s);
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const pageUrl = id => 'https://www.notion.so/' + id.replace(/-/g, '');

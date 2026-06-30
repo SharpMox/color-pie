@@ -271,18 +271,17 @@ function renderEffect(eff){
     .map(function(m){return '<span class="tag">'+m[0]+': '+esc(m[1])+'</span>';}).join('');
   var TORDER = { primary:0, secondary:1, tertiary:2 };
   var trank = function(k){ var v=TORDER[eff.rank[k]]; return v==null?3:v; };
-  var secs = COLORS.slice().sort(function(a,b){return trank(a[0])-trank(b[0]);}).map(function(c){
-    var t = eff.rank[c[0]];
-    var tilePicks = t ? ['onRate','cheapest','outdated','iconic'] : [];   // bend/break moved to their own subsections below
-    var cell = eff.cards[c[0]] || {};
-    var arts = tilePicks.filter(function(p){return cell[p];}).map(function(p){
+  // tile + bend/break builders, shared by the mono colors and the 🟡 gold section
+  var artHtml = function(cell, picks){
+    return picks.filter(function(p){return cell[p];}).map(function(p){
       var name = cell[p], img = cardImg(name);
       return '<fieldset class="art"><legend>'+ARCH[p]+'</legend>'+
         (img?'<img loading="lazy" src="'+esc(img)+'" alt="'+esc(name)+'"/>':'')+
         '<p class="cname">'+esc(name)+'</p></fieldset>';
     }).join('');
-    // Bend / Break subsections: object {1:{name,desc}} → image+description rows; legacy string → one row.
-    var bb = ['bend','breaks'].map(function(p){
+  };
+  var bbHtml = function(cell){
+    return ['bend','breaks'].map(function(p){
       var v = cell[p]; if(!v) return '';
       var items = typeof v === 'string' ? [{name:v,desc:''}]
         : Object.keys(v).sort(function(a,b){return a-b;}).map(function(k){return v[k];});
@@ -295,6 +294,13 @@ function renderEffect(eff){
       }).join('');
       return '<fieldset class="art bb-sec'+(p==='breaks'?' brk':' bnd')+'"><legend>'+ARCH[p]+'</legend><div class="bb-cards">'+rows+'</div></fieldset>';
     }).join('');
+  };
+  var secs = COLORS.slice().sort(function(a,b){return trank(a[0])-trank(b[0]);}).map(function(c){
+    var t = eff.rank[c[0]];
+    var tilePicks = t ? ['onRate','cheapest','outdated','iconic'] : [];   // bend/break moved to their own subsections below
+    var cell = eff.cards[c[0]] || {};
+    var arts = artHtml(cell, tilePicks);
+    var bb = bbHtml(cell);
     var lab = t ? '<span class="tierlab tier-'+t+'">'+TIERWORD[t]+'</span>'
                 : '<span class="tierlab tier-off">Off-pie</span>';
     var body = (arts?'<div class="art-strip">'+arts+'</div>':'')+bb;
@@ -303,15 +309,10 @@ function renderEffect(eff){
   }).join('');
   // 🟡 MultiColor: a tier-less section, appended after the 6 colors
   var my = eff.cards.Y;
-  if (my && (my.onRate || my.outdated)) {
-    var marts = ['onRate','outdated'].filter(function(p){return my[p];}).map(function(p){
-      var name = my[p], img = cardImg(name);
-      return '<fieldset class="art"><legend>'+ARCH[p]+'</legend>'+
-        (img?'<img loading="lazy" src="'+esc(img)+'" alt="'+esc(name)+'"/>':'')+
-        '<p class="cname">'+esc(name)+'</p></fieldset>';
-    }).join('');
+  if (my && Object.keys(my).length) {
+    var marts = artHtml(my, ['onRate','cheapest','outdated','iconic']);
     secs += '<div class="color-sec"><h3><span class="badge Y" title="Multicolor"></span>Multicolor</h3>'+
-      '<div class="art-strip">'+marts+'</div></div>';
+      (marts?'<div class="art-strip">'+marts+'</div>':'')+bbHtml(my)+'</div>';
   }
   document.getElementById('effect').innerHTML =
     '<h2 class="eff-title">'+esc(eff.title)+'</h2>'+
