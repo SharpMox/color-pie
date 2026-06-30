@@ -145,10 +145,12 @@ fieldset.art.bnd > legend { color: #e08a2e; }
 .art .cname { font-size: 12px; margin: 6px 0 0; }
 .no-art { color: var(--text-soft); font-size: 13px; }
 /* Bend/Break: each card is an image-width tile (left-aligned), image + title/desc centered inside */
-fieldset.art.bb-sec { width: fit-content; max-width: 100%; }
-.bb-row { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; margin: 8px 0; }
-.bb-card { width: 182px; max-width: 100%; text-align: center; }   /* image-width tile: image + title centered */
-.bb-note { max-width: 340px; text-align: left; margin: 4px 0 0; color: var(--text-soft); font-size: 12px; }   /* wider description, left-aligned */
+fieldset.art.bb-sec { width: 100%; }
+.bb-cards { display: flex; flex-wrap: wrap; gap: 12px; }   /* bend/break cards in a wrapping row */
+.bb-row { display: flex; align-items: flex-start; gap: 10px; width: 360px; max-width: 100%; }   /* card: image+title (left) · description (right) */
+.bb-card { width: 130px; flex: none; text-align: center; }
+.bb-card img { width: 130px; max-width: 100%; }
+.bb-note { flex: 1; min-width: 0; text-align: left; margin: 0; color: var(--text-soft); font-size: 12px; }   /* description on the right */
 
 /* Review affordance (row pill + modal button) */
 .review-cell { display: flex; justify-content: center; align-items: center; }
@@ -496,7 +498,7 @@ fieldset.art.bb-sec { width: fit-content; max-width: 100%; }
             '<span class="cname">' + esc(it.name) + '</span></div>' +
             (it.desc ? '<p class="bb-note">' + esc(it.desc) + '</p>' : '') + '</div>';
         }).join('');
-        return '<fieldset class="art bb-sec' + (p === 'breaks' ? ' brk' : ' bnd') + '"><legend>' + ARCH[p] + '</legend>' + rows + '</fieldset>';
+        return '<fieldset class="art bb-sec' + (p === 'breaks' ? ' brk' : ' bnd') + '"><legend>' + ARCH[p] + '</legend><div class="bb-cards">' + rows + '</div></fieldset>';
       }).join('');
       var lab = t ? '<span class="tierlab tier-' + t + '">' + TIERWORD[t] + '</span>'
                   : '<span class="tierlab tier-off">Off-pie</span>';
