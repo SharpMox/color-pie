@@ -52,7 +52,7 @@ fieldset.art.bnd > legend { color: #e08a2e; }
 /* Bend/Break: each card is an image-width tile (left-aligned), image + title/desc centered inside */
 fieldset.art.bb-sec { width: 100%; padding-bottom: 18px; }   /* balance the legend's top overhang so the card separators sit evenly */
 .bb-cards { display: flex; flex-wrap: wrap; row-gap: 16px; align-items: flex-start; }   /* bend/break cards in a wrapping row */
-.bb-row + .bb-row { border-left: 1px solid var(--border); margin-left: 16px; padding-left: 16px; }   /* separator between cards */
+.bb-row:not(:last-child) { border-right: 1px solid var(--border); margin-right: 16px; padding-right: 16px; }   /* separator grouped with the left card → stays at the end of a wrapped row */
 .bb-row { display: flex; align-items: flex-start; gap: 10px; width: 440px; max-width: 100%; }   /* card: image+title (left) · description (right) */
 .bb-card { width: 182px; flex: none; text-align: center; }
 .bb-card img { width: 182px; max-width: 100%; }
