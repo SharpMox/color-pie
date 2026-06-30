@@ -50,10 +50,10 @@ fieldset.art.brk > legend { color: var(--c-R); }
 fieldset.art.bnd { border-color: #e08a2e; }
 fieldset.art.bnd > legend { color: #e08a2e; }
 /* Bend/Break subsections: one stacked card per entry (image, title, description) */
-fieldset.art.bb-sec { width: 100%; text-align: left; }   /* beat fieldset.art's text-align:center so the card title left-aligns */
-.bb-row { display: flex; flex-direction: column; gap: 6px; margin: 10px 0; }
-.bb-desc { min-width: 0; }
-.bb-desc .cname { display: block; font-weight: 600; font-size: 12px; }
+fieldset.art.bb-sec { width: 100%; }
+.bb-row { display: flex; flex-direction: column; align-items: center; gap: 6px; margin: 10px 0; }   /* image on top, name centered under it (like the .art tiles) */
+.bb-desc { min-width: 0; text-align: center; }
+.bb-desc .cname { display: block; }   /* inherit .art .cname (12px, normal weight, centered) */
 .bb-desc p { margin: 4px 0 0; color: var(--text-soft); font-size: 12px; }
 .art img { width: 182px; max-width: 100%; border-radius: 7px; display: block; background: var(--surface-2); aspect-ratio: 488/680; object-fit: cover; cursor: zoom-in; }
 .img-preview { position: fixed; z-index: 80; width: 360px; max-width: 46vw; border-radius: 14px; border: 1px solid var(--border); box-shadow: var(--shadow); background: var(--surface-2); aspect-ratio: 488/680; object-fit: cover; pointer-events: none; }
@@ -112,11 +112,7 @@ hr.sep { border: 0; border-top: 1px solid var(--border); margin: 18px 0; }
   .art-strip { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .art img { width: 100%; }                          /* fill the grid cell */
 
-  /* Bend/Break: match the main-page modal — horizontal row, image left + description right */
-  .bb-row { flex-direction: row; gap: 12px; align-items: flex-start; }
-  .bb-row img { width: 120px; flex: none; }          /* override the 100% art-img rule above */
-  .bb-desc { flex: 1; }
-  .bb-desc .cname, .bb-desc p { font-size: 13px; }
+  .bb-row img { width: 182px; max-width: 100%; }     /* keep bend/break image at card size, not the grid's 100% */
 }
 
 /* ===== Feedback drawer ===== */
