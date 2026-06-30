@@ -50,7 +50,7 @@ fieldset.art.brk > legend { color: var(--c-R); }
 fieldset.art.bnd { border-color: #e08a2e; }
 fieldset.art.bnd > legend { color: #e08a2e; }
 /* Bend/Break: each card is an image-width tile (left-aligned), image + title/desc centered inside */
-fieldset.art.bb-sec { width: 100%; min-width: 0; padding-bottom: 18px; }   /* min-width:0 defeats the fieldset min-content default so it can't overflow mobile; padding-bottom balances the legend's top overhang */
+fieldset.art.bb-sec { width: 100%; min-width: 0; margin-top: 14px; padding-bottom: 18px; }   /* min-width:0 defeats the fieldset min-content default so it can't overflow mobile; padding-bottom balances the legend's top overhang */
 .bb-cards { display: flex; flex-wrap: wrap; row-gap: 16px; align-items: flex-start; }   /* bend/break cards in a wrapping row */
 .bb-row:not(:last-child) { border-right: 1px solid var(--border); margin-right: 16px; padding-right: 16px; }   /* separator grouped with the left card → stays at the end of a wrapped row */
 .bb-row { display: flex; align-items: flex-start; gap: 10px; width: 440px; max-width: 100%; }   /* card: image+title (left) · description (right) */
