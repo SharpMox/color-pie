@@ -51,8 +51,8 @@ fieldset.art.bnd { border-color: #e08a2e; }
 fieldset.art.bnd > legend { color: #e08a2e; }
 /* Bend/Break subsections: one stacked card per entry (image, title, description) */
 fieldset.art.bb-sec { width: 100%; }
-.bb-row { display: flex; flex-direction: column; align-items: center; gap: 6px; margin: 10px 0; }   /* image on top, name centered under it (like the .art tiles) */
-.bb-desc { min-width: 0; text-align: center; }
+.bb-row { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; margin: 10px 0; }   /* image on top, title + description left-aligned beneath */
+.bb-desc { min-width: 0; text-align: left; }
 .bb-desc .cname { display: block; }   /* inherit .art .cname (12px, normal weight, centered) */
 .bb-desc p { margin: 4px 0 0; color: var(--text-soft); font-size: 12px; }
 .art img { width: 182px; max-width: 100%; border-radius: 7px; display: block; background: var(--surface-2); aspect-ratio: 488/680; object-fit: cover; cursor: zoom-in; }
