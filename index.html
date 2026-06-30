@@ -144,11 +144,11 @@ fieldset.art.bnd > legend { color: #e08a2e; }
 .img-preview { position: fixed; z-index: 80; width: 420px; max-width: 46vw; border-radius: 14px; border: 1px solid var(--border); box-shadow: var(--shadow); background: var(--surface-2); aspect-ratio: 488/680; object-fit: cover; pointer-events: none; }
 .art .cname { font-size: 12px; margin: 6px 0 0; }
 .no-art { color: var(--text-soft); font-size: 13px; }
-/* Bend/Break subsections: full-width, one row per card (image left, description right) */
-fieldset.art.bb-sec { width: 100%; }
-.bb-row { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; margin: 8px 0; }   /* image on top, title + description left-aligned beneath */
+/* Bend/Break: each card is an image-width tile (left-aligned), image + title/desc centered inside */
+fieldset.art.bb-sec { width: fit-content; max-width: 100%; }
+.bb-row { display: flex; flex-direction: column; align-items: center; gap: 6px; margin: 8px 0; }
 .bb-row img { width: 182px; flex: none; }
-.bb-desc { min-width: 0; text-align: left; }
+.bb-desc { min-width: 0; text-align: center; }
 .bb-desc .cname { display: block; }   /* inherit .art .cname (12px, normal weight, centered) */
 .bb-desc p { margin: 4px 0 0; color: var(--text-soft); font-size: 13px; }
 
