@@ -25,6 +25,7 @@
   --c-R: #c4453f; --c-R-ink: #ffffff;
   --c-G: #2f9a63; --c-G-ink: #ffffff;
   --c-C: #b9c0cc; --c-C-ink: #2a2f38;
+  --c-Y: #c69a1e; --c-Y-ink: #ffffff;   /* MultiColor gold */
 
   /* Tier accents */
   --tier-primary: #2da06b;
@@ -48,6 +49,7 @@
   --c-R: #e0635c; --c-R-ink: #1b0807;
   --c-G: #43b97c; --c-G-ink: #05140c;
   --c-C: #8b94a3; --c-C-ink: #0c1119;
+  --c-Y: #e3c04b; --c-Y-ink: #1c1605;   /* MultiColor gold */
 
   --tier-primary: #6dd6a8;
   --tier-secondary: #ffae5c;

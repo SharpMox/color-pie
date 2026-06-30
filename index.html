@@ -108,6 +108,7 @@ details.group[open] > .row { margin-top: 6px; }
 .badge.W{--col:var(--c-W);--col-ink:var(--c-W-ink)} .badge.U{--col:var(--c-U);--col-ink:var(--c-U-ink)}
 .badge.B{--col:var(--c-B);--col-ink:var(--c-B-ink)} .badge.R{--col:var(--c-R);--col-ink:var(--c-R-ink)}
 .badge.G{--col:var(--c-G);--col-ink:var(--c-G-ink)} .badge.C{--col:var(--c-C);--col-ink:var(--c-C-ink)}
+.badge.Y{--col:var(--c-Y);--col-ink:var(--c-Y-ink)}
 .empty { color: var(--text-soft); padding: 30px 10px; text-align: center; }
 
 /* ===== Detail dialog ===== */
@@ -297,7 +298,7 @@ fieldset.art.bnd > legend { color: #e08a2e; }
     { k:'C', name:'Colorless', glyph:'◇' }
   ];
   var TIERWORD = { primary:'Primary', secondary:'Secondary', tertiary:'Tertiary' };
-  var ARCH = { onRate:'On-rate', cheapest:'Cheapest', iconic:'Iconic', bend:'Bend', breaks:'Break' };
+  var ARCH = { onRate:'On-rate', cheapest:'Cheapest', outdated:'Outdated', iconic:'Iconic', bend:'Bend', breaks:'Break' };
 
   // ----- State -----
   var selected = new Set(['W','U','B','R','G','C']);   // all colors on by default
@@ -476,7 +477,7 @@ fieldset.art.bnd > legend { color: #e08a2e; }
     var trank = function (c) { var v = TORDER[eff.rank[c.k]]; return v == null ? 3 : v; };
     var secs = cols.slice().sort(function (a, b) { return trank(a) - trank(b); }).map(function (c, i) {
       var t = eff.rank[c.k];
-      var tilePicks = t ? ['onRate','cheapest','iconic'] : [];   // bend/break moved to their own subsections below
+      var tilePicks = t ? ['onRate','cheapest','outdated','iconic'] : [];   // bend/break moved to their own subsections below
       var cell = eff.cards[c.k] || {};
       var arts = tilePicks.filter(function (p) { return cell[p]; }).map(function (p) {
         var name = cell[p], img = cardImg(name);
@@ -505,6 +506,18 @@ fieldset.art.bnd > legend { color: #e08a2e; }
       return '<div class="color-sec' + (i % 2 ? ' alt' : '') + '"><h3><span class="badge ' + c.k + '" title="' + c.name + '"></span>' + c.name + lab + '</h3>' +
         (body || '<p class="no-art">No example card.</p>') + '</div>';
     }).join('');
+    // 🟡 MultiColor: a tier-less section, always shown (not in the picker), after the 6 colors
+    var my = eff.cards.Y;
+    if (my && (my.onRate || my.outdated)) {
+      var marts = ['onRate','outdated'].filter(function (p) { return my[p]; }).map(function (p) {
+        var name = my[p], img = cardImg(name);
+        return '<fieldset class="art"><legend>' + ARCH[p] + '</legend>' +
+          (img ? '<img loading="lazy" src="' + esc(img) + '" alt="' + esc(name) + '"/>' : '') +
+          '<p class="cname">' + esc(name) + '</p></fieldset>';
+      }).join('');
+      secs += '<div class="color-sec"><h3><span class="badge Y" title="Multicolor"></span>Multicolor</h3>' +
+        '<div class="art-strip">' + marts + '</div></div>';
+    }
     return secs;
   }
   var dlg = document.getElementById('detail');
