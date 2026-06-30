@@ -117,7 +117,7 @@ hr.sep { border: 0; border-top: 1px solid var(--border); margin: 18px 0; }
   .bb-card img { width: 182px; max-width: 100%; }    /* bend/break image (not the grid's 100%) */
   /* Bend/Break: horizontal scroll strip on small screens so the wide cards don't overflow */
   .bb-cards { flex-wrap: nowrap; overflow-x: auto; }
-  .bb-row { width: min(440px, 86vw); flex: 0 0 auto; }
+  .bb-row { width: 400px; max-width: none; flex: 0 0 auto; }   /* fixed width fits image(182)+gap+description(min 182); strip scrolls */
 }
 
 /* ===== Feedback drawer ===== */
