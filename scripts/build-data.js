@@ -22,7 +22,7 @@ if (!fs.existsSync(DIR)) {
 const read = f => parse(fs.readFileSync(path.join(DIR, f), 'utf8')).rows;
 
 const SENTINELS = ['🚫 Not in Pie', '❌ Not printed'];
-const COLS = [['⚪ White','W'],['🔵 Blue','U'],['⚫ Black','B'],['🔴 Red','R'],['🟢 Green','G'],['◇ Colorless','C']];
+const COLS = [['⚪ White','W'],['🔵 Blue','U'],['⚫ Black','B'],['🔴 Red','R'],['🟢 Green','G'],['◇ Colorless','C'],['🟡 MultiColor','Y']];
 const CNAME2KEY = { White:'W', Blue:'U', Black:'B', Red:'R', Green:'G', Colorless:'C' };
 const EMPTY_RANK = () => ({ W:null, U:null, B:null, R:null, G:null, C:null });
 
@@ -132,7 +132,7 @@ if (process.argv.includes('--check')) {
   const flying = effects.find(e => e.base === 'Flying');
   if (!flying) errs.push('no effect in the "Flying" group found');
   else if (flying.rank.W !== 'primary') errs.push('Flying tier in White = ' + flying.rank.W + ' (expected primary)');
-  const unranked = effects.filter(e => !Object.values(e.rank).some(Boolean));
+  const unranked = effects.filter(e => !Object.values(e.rank).some(Boolean) && !Object.values(e.cards).some(Boolean));
   if (unranked.length > 20) errs.push(unranked.length + ' effects have no ranking (parser likely dropped relations)');
   const withArt = effects.filter(e =>
     Object.values(e.cards).some(c => Object.values(c).some(n => CARDS[n]))).length;

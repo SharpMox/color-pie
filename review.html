@@ -31,6 +31,7 @@ h2.eff-title { margin: 0 0 4px; font-size: 20px; }
 .badge.W{--col:var(--c-W);--col-ink:var(--c-W-ink)} .badge.U{--col:var(--c-U);--col-ink:var(--c-U-ink)}
 .badge.B{--col:var(--c-B);--col-ink:var(--c-B-ink)} .badge.R{--col:var(--c-R);--col-ink:var(--c-R-ink)}
 .badge.G{--col:var(--c-G);--col-ink:var(--c-G-ink)} .badge.C{--col:var(--c-C);--col-ink:var(--c-C-ink)}
+.badge.Y{--col:var(--c-Y);--col-ink:var(--c-Y-ink)}
 
 /* Colors on a single horizontal row (scrolls on mobile) */
 .colors-row { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; margin: 0 0 6px; }
@@ -302,6 +303,18 @@ function renderEffect(eff){
     return '<div class="color-sec"><h3><span class="badge '+c[0]+'" title="'+c[1]+'"></span>'+c[1]+lab+'</h3>'+
       (body||'<p class="no-art">No example card.</p>')+'</div>';
   }).join('');
+  // 🟡 MultiColor: a tier-less section, appended after the 6 colors
+  var my = eff.cards.Y;
+  if (my && (my.onRate || my.outdated)) {
+    var marts = ['onRate','outdated'].filter(function(p){return my[p];}).map(function(p){
+      var name = my[p], img = cardImg(name);
+      return '<fieldset class="art"><legend>'+ARCH[p]+'</legend>'+
+        (img?'<img loading="lazy" src="'+esc(img)+'" alt="'+esc(name)+'"/>':'')+
+        '<p class="cname">'+esc(name)+'</p></fieldset>';
+    }).join('');
+    secs += '<div class="color-sec"><h3><span class="badge Y" title="Multicolor"></span>Multicolor</h3>'+
+      '<div class="art-strip">'+marts+'</div></div>';
+  }
   document.getElementById('effect').innerHTML =
     '<h2 class="eff-title">'+esc(eff.title)+'</h2>'+
     '<p class="eff-sub">'+esc(eff.type)+(eff.category?' · '+esc(eff.category):'')+'</p>'+
