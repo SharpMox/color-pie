@@ -145,7 +145,7 @@ fieldset.art.bnd > legend { color: #e08a2e; }
 .art .cname { font-size: 12px; margin: 6px 0 0; }
 .no-art { color: var(--text-soft); font-size: 13px; }
 /* Bend/Break subsections: full-width, one row per card (image left, description right) */
-.bb-sec { width: 100%; text-align: left; }
+fieldset.art.bb-sec { width: 100%; text-align: left; }   /* beat fieldset.art's text-align:center so the card title left-aligns */
 .bb-row { display: flex; gap: 12px; align-items: flex-start; margin: 8px 0; }
 .bb-row img { width: 120px; flex: none; border-radius: 9px; aspect-ratio: 488/680; object-fit: cover; cursor: zoom-in; }
 .bb-desc { flex: 1; min-width: 0; }
