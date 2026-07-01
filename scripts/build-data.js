@@ -44,6 +44,21 @@ function relNames(cell) {
 }
 const firstCard = cell => relNames(cell).find(n => SENTINELS.indexOf(n) === -1) || null;
 
+// Bend/Break: emit ALL non-sentinel cards as {i:{name,desc}} (desc looked up by
+// name from the paired '{"Card":"note"}' JSON column). A lone undescribed card
+// stays a bare string (backward-compat with the string-only renderer).
+function bbVal(cell, descRaw) {
+  const names = relNames(cell).filter(n => SENTINELS.indexOf(n) === -1);
+  if (!names.length) return undefined;
+  let desc = {};
+  if (descRaw) { try { desc = JSON.parse(descRaw); } catch (e) { /* ponytail: bad JSON → no notes */ } }
+  names.forEach(pick);
+  if (names.length === 1 && !Object.keys(desc).length) return names[0];
+  const obj = {};
+  names.forEach((n, i) => { obj[i + 1] = { name: n, desc: desc[n] || '' }; });
+  return obj;
+}
+
 // Scryfall link tuning: the Notion column stores the pure effect query; the site
 // link shows each card's FIRST printing (is:firstprint) ordered by most recent
 // release. Applied uniformly here so Notion stays the canonical pure query.
@@ -96,8 +111,8 @@ const effects = read('Effects.csv')
     const ch = firstCard(r[col + ' (Cheapest)']);    if (ch) c.cheapest = pick(ch);
     const od = firstCard(r[col + ' (Outdated)']);    if (od) c.outdated = pick(od);
     const ic = firstCard(r[col + ' (Iconic)']);      if (ic) c.iconic = pick(ic);
-    const bn = firstCard(r[col + ' (Bends)']);       if (bn) c.bend = pick(bn);
-    const bk = firstCard(r[col + ' (Breaks)']);      if (bk) c.breaks = pick(bk);
+    const bn = bbVal(r[col + ' (Bends)'], r[col + ' (Bends Description)']);    if (bn) c.bend = bn;
+    const bk = bbVal(r[col + ' (Breaks)'], r[col + ' (Breaks Description)']);  if (bk) c.breaks = bk;
     if (Object.keys(c).length) cards[k] = c;
   });
   return {
