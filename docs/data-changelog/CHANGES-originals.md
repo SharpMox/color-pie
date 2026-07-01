@@ -764,3 +764,9 @@ Auto-picked from Scryfall oracle queries (On-Rate=purity/type/cmc, Cheapest=min 
 - Team pump, one-shot — +N/+0 your team: Kiddie Coaster → ❌ (On-Rate + Cheapest)
 - Team pump, one-shot — +N/+N your team: Kiddie Coaster → ❌ (On-Rate + Cheapest)
 - Creature destruction — Destroy creature with power 3+: Goblin Coward Parade → ❌ (all 3 slots)
+
+
+---
+
+## Correction note (2026-07-01)
+The original ◇ Colorless picks in this pass used `-is:funny` (insufficient — Unfinity sticker/attraction cards slip through). These were fixed 2026-06-28: 14 new colorless Example Cards created (Prying Blade, Brass Man, Bag of Holding, Currency Converter, Voyager Staff, Jar of Eyeballs, Gallows at Willow Hill, Nemesis Mask, Grinning Totem, Hangarback Walker, Endless One, Transmogrifying Wand, Winter Orb, Memory Jar), sibling cards reused, and 5 unprintable cells set to the ❌ Not printed sentinel, across 24 effect rows. Use `-st:funny` going forward.
