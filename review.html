@@ -265,7 +265,7 @@ function renderEffect(eff){
   document.title = 'Review: ' + eff.title + ' — Color Pie';
   var hs = document.getElementById('hdr-scryfall');   // header Scryfall button (next to Feedback, all viewports)
   hs.hidden = !eff.scryfall;
-  if (eff.scryfall) hs.href = eff.scryfall;
+  if (eff.scryfall) { hs.href = eff.scryfall; hs.textContent = eff.count ? 'Scryfall (' + eff.count.toLocaleString() + ')' : 'Scryfall'; }
   var meta = [['Interaction',eff.interaction],['Duration',eff.duration],['Base keyword',eff.baseKeyword]]
     .filter(function(m){return m[1];})
     .map(function(m){return '<span class="tag">'+m[0]+': '+esc(m[1])+'</span>';}).join('');

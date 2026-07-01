@@ -94,6 +94,26 @@ const mapById = pages => Object.fromEntries(pages.map(p => [p.id, titleOf(p)]));
 // Inverse of build-data.js relNames(): "Name (url), Name2 (url2)".
 const relCell = (ids, map) => ids.map(id => `${map[id] || ''} (${pageUrl(id)})`).join(', ');
 
+// QueryCount: Scryfall total_cards for an effect's stored (pure) query URL.
+// Resilient — any Scryfall failure yields '' so a hiccup never fails the refresh.
+async function queryCount(scryUrl) {
+  if (!scryUrl) return '';
+  const i = scryUrl.indexOf('?q=');
+  if (i === -1) return '';
+  const q = decodeURIComponent(scryUrl.slice(i + 3).split('&')[0]);
+  const H = { 'User-Agent': 'color-pie-querycount/1.0', 'Accept': 'application/json' };
+  try {
+    for (let attempt = 0; ; attempt++) {
+      const res = await fetch('https://api.scryfall.com/cards/search?q=' + encodeURIComponent(q), { headers: H });
+      if (res.status === 404) return 0;                                   // no cards match
+      if ((res.status === 429 || res.status >= 500) && attempt < 5) { await sleep(2000); continue; }
+      if (!res.ok) return '';
+      const j = await res.json();
+      return j.total_cards || 0;
+    }
+  } catch (e) { return ''; }
+}
+
 // ---- CSV serializer (inverse of scripts/csv.js parse()) ----
 const csvField = v => { v = v == null ? '' : String(v); return /[",\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
 const toCSV = (headers, rows) =>
@@ -133,8 +153,8 @@ async function main() {
   })));
 
   const effHeaders = ['Effect', 'Index', 'Type', 'Interaction', 'Duration', 'Base Keyword',
-    'Design Rationale', 'Scryfall Query', 'Sort Order', 'Category', 'Ranking', ...COLOR_COLS, ...DESC_COLS];
-  writeCSV('Effects.csv', effHeaders, effects.map(p => {
+    'Design Rationale', 'Scryfall Query', 'Sort Order', 'Category', 'Ranking', ...COLOR_COLS, ...DESC_COLS, 'QueryCount'];
+  const effRows = effects.map(p => {
     const r = {
       Effect: titleOf(p), Index: indexOf(p),
       Type: val(p.properties['Type']), Interaction: val(p.properties['Interaction']),
@@ -146,7 +166,10 @@ async function main() {
     for (const col of COLOR_COLS) r[col] = relCell(relIds(p, col), cardMap);
     for (const col of DESC_COLS) r[col] = val(p.properties[col]); // TEXT, not a relation
     return r;
-  }));
+  });
+  // QueryCount: recompute each effect's live Scryfall card count (paced ~9 req/s).
+  for (const r of effRows) { r['QueryCount'] = await queryCount(r['Scryfall Query']); await sleep(110); }
+  writeCSV('Effects.csv', effHeaders, effRows);
 
   console.log('Done. Now run: node scripts/build-data.js --check');
 }

@@ -543,7 +543,7 @@ fieldset.art.bb-sec { width: 100%; min-width: 0; margin-top: 14px; padding-botto
     document.getElementById('d-body').innerHTML = detailHTML(eff);
     var sf = document.getElementById('d-scryfall');
     sf.hidden = !eff.scryfall;
-    if (eff.scryfall) sf.href = eff.scryfall;
+    if (eff.scryfall) { sf.href = eff.scryfall; sf.textContent = eff.count ? 'Scryfall (' + eff.count.toLocaleString() + ')' : 'Scryfall'; }
     var c = fbCounts[eff.id] || { total: 0, accepted: 0 };
     var rev = document.getElementById('d-review');
     rev.href = 'review.html?id=' + encodeURIComponent(eff.id);
