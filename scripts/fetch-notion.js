@@ -26,6 +26,11 @@ for (const c of ['⚪ White', '🔵 Blue', '⚫ Black', '🔴 Red', '🟢 Green'
   for (const s of ['', ' (Cheapest)', ' (Outdated)', ' (Iconic)', ' (Bends)', ' (Breaks)']) COLOR_COLS.push(c + s);
 for (const s of ['', ' (Cheapest)', ' (Outdated)', ' (Iconic)', ' (Bends)', ' (Breaks)']) COLOR_COLS.push('🟡 MultiColor' + s);
 
+// Per-card Bend/Break notes live in TEXT columns (JSON {"Card":"desc"}), mono colors only.
+const DESC_COLS = [];
+for (const c of ['⚪ White', '🔵 Blue', '⚫ Black', '🔴 Red', '🟢 Green', '◇ Colorless'])
+  for (const s of [' (Bends Description)', ' (Breaks Description)']) DESC_COLS.push(c + s);
+
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const pageUrl = id => 'https://www.notion.so/' + id.replace(/-/g, '');
 
@@ -127,7 +132,7 @@ async function main() {
   })));
 
   const effHeaders = ['Effect', 'Index', 'Type', 'Interaction', 'Duration', 'Base Keyword',
-    'Design Rationale', 'Scryfall Query', 'Sort Order', 'Category', 'Ranking', ...COLOR_COLS];
+    'Design Rationale', 'Scryfall Query', 'Sort Order', 'Category', 'Ranking', ...COLOR_COLS, ...DESC_COLS];
   writeCSV('Effects.csv', effHeaders, effects.map(p => {
     const r = {
       Effect: titleOf(p), Index: indexOf(p),
@@ -138,6 +143,7 @@ async function main() {
       Category: relCell(relIds(p, 'Category'), catMap), Ranking: relCell(relIds(p, 'Ranking'), rankMap),
     };
     for (const col of COLOR_COLS) r[col] = relCell(relIds(p, col), cardMap);
+    for (const col of DESC_COLS) r[col] = val(p.properties[col]); // TEXT, not a relation
     return r;
   }));
 
