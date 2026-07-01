@@ -126,6 +126,7 @@ const effects = read('Effects.csv')
     duration: r['Duration'] || '',
     baseKeyword: r['Base Keyword'] || '',
     scryfall: scryUrl(r['Scryfall Query']),
+    count: Number(r['QueryCount']) || 0,
     rank, cards
   };
 }).filter(Boolean);
