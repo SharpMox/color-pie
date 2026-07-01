@@ -125,3 +125,15 @@ Every flagged effect/cell from `flags-outdated.md` (102 On-Rate-missing + 65 too
 ## S — sparse/correct (no change), 40 cells
 
 Near-unprinted variants (mostly protection/keyword-grant) where the color genuinely has 0–1 cards; the query is correct.
+
+---
+
+## Refinement pass (follow-up)
+
+**Quality pass on the weakest curation replacements (8):** swapped extraneous/weak picks for cleaner representatives — [37] ⚫ Animate Dead → **Torment**; [110] 🟡 → **Meddling Mage** (iconic gold); [157] 🟡 → **Gelectrode**; [160] 🟡 Molten Note → **War Flare** (Molten Note doesn't untap creatures); [161] 🟡 Hydroid Krasis → **Nimbus Swimmer** (no +1/+1 counters); [179] 🟡 → **Deathcult Rogue**; cleared [122] 🟡 (Shield of the Righteous doesn't lock) and [185] 🟡 (no gold land-tutor). Cleared [157]'s Outdated (collided with the new On-Rate).
+
+**Heterogeneous (H) effects resolved:**
+- **[65] Cast from your graveyard** — query widened to `(o:/cast … from your graveyard/ or o:"gains flashback")`, Scryfall-verified (Snapcaster now matched) → written to Notion.
+- **[20] Friendly to a card type** — was mis-filed (anti-type *hate* + a generic anthem), reclassified as curation → replaced all 6 with correct type-lords (Wizened Cenn, Battleground Geist, Mad Auntie, Kobold Taskmaster, Meng Huo, Chief of the Edge).
+- **[131] Play opponent's cards** — library-manipulation that doesn't *play* the cards → replaced ⚫/🟡 with Nashi / Nathan Drake, cleared 🔵.
+- **[14] Rewards a chosen quality** — replaced ⚪ with Crown of Awe (share-a-color), cleared 🟡. Genuinely vague effect; query left as-is.
