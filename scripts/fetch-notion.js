@@ -30,6 +30,7 @@ for (const s of ['', ' (Cheapest)', ' (Outdated)', ' (Iconic)', ' (Bends)', ' (B
 const DESC_COLS = [];
 for (const c of ['⚪ White', '🔵 Blue', '⚫ Black', '🔴 Red', '🟢 Green', '◇ Colorless'])
   for (const s of [' (Bends Description)', ' (Breaks Description)']) DESC_COLS.push(c + s);
+DESC_COLS.push('🟡 MultiColor (Bends Description)'); // gold has Bends notes only (no Breaks)
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const pageUrl = id => 'https://www.notion.so/' + id.replace(/-/g, '');

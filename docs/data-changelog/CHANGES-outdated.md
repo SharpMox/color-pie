@@ -580,3 +580,9 @@ The **Outdated** archetype = the recognizable, older / below-rate card for an ef
 | Token generation — Ongoing | ⚫ Black | Breeding Pit | 4·2014 | Bitterblossom |  |
 | Token generation — Ongoing | 🟢 Green | Honden of Life's Web | 5·2016 | Verdant Force |  |
 | Token generation — Ongoing | 🟡 MultiColor | Hazezon Tamar | 7·1994 | Creakwood Liege | Iconic Legends token-maker general; dated. |
+
+
+---
+
+## Correction (2026-07-01)
+After the flag-pass curation, **10 Outdated cells were cleared** where the corrected On-Rate collided with the existing Outdated pick, and several On-Rates changed (curation + refinement). Live Outdated total is now **563** cells (not 574). See CHANGES-followups.md.
