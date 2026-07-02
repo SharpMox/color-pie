@@ -102,8 +102,13 @@ const effects = read('Effects.csv')
   .map(r => {
   const title = r['Effect'];
   if (!title) return null;
-  const base = relNames(r['Ranking'])[0] || title.split(' — ')[0];
-  const rank = rankByEffect[base] || EMPTY_RANK();
+  // Group label = effect family (title before " — "). Decoupled from the Ranking
+  // relation, whose name is now an abstract color-distribution shorthand shared by
+  // many effects (e.g. "WU > BR > G"), not a per-effect label.
+  const base = title.split(' — ')[0];
+  // Tier lookup still keys off the effect's Ranking relation — its target row title
+  // is the shorthand, matching rankByEffect (keyed by Effects Rankings' title).
+  const rank = rankByEffect[relNames(r['Ranking'])[0]] || EMPTY_RANK();
   const cards = {};
   COLS.forEach(([col, k]) => {
     const c = {};
@@ -117,7 +122,7 @@ const effects = read('Effects.csv')
   });
   return {
     id: r['Index'] || '',        // Notion unique-ID — stable key for review feedback
-    title, base,                 // base = group label (Notion Ranking relation), not a real row
+    title, base,                 // base = effect-family group label (title prefix)
 
     type: r['Type'] || '',
     category: relNames(r['Category'])[0] || '',
